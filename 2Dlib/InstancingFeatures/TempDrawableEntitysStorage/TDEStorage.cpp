@@ -160,7 +160,7 @@ void HEntity::updateHierarchyLevel()
 
 void HEntity::updatePrevParentChildsData()
 {
-   if (m_storageParentID = -1) return;
+   if (m_storageParentID == -1) return;
 
    HEntity &parent = m_parentStorage->m_spriteEntities[m_storageParentID];
 
@@ -205,7 +205,8 @@ void IDEntity::updateTransformedSequence(int old_hLevel)
 {
     if (old_hLevel == m_hLevel) return;
 
-    m_parentStorage->m_eTransformUpdate[old_hLevel].erase(m_parentStorage->m_eTransformUpdate[old_hLevel].begin() + m_transformID);
+    if (m_transformID != -1) 
+        m_parentStorage->m_eTransformUpdate[old_hLevel].erase(m_parentStorage->m_eTransformUpdate[old_hLevel].begin() + m_transformID);
     this->updateTransformed();
 }
 

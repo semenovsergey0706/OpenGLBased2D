@@ -93,6 +93,7 @@ int main()
 
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	float angle = 0;
+	bool retach = false;
     while (!glfwWindowShouldClose(myWindow.get()))
     {
         glfwPollEvents();		
@@ -104,6 +105,17 @@ int main()
 
 		sprite = &myTDE.getSpriteEntityByStorageID(1);
 		sprite->setRotation(-angle);
+
+
+		if (!retach && t.elapsed() >= 10)
+		{
+			myTDE.getSpriteEntityByStorageID(3).attachTo(myTDE.getSpriteEntityByStorageID(0));
+			retach = true;
+		}
+		else if (retach && t.elapsed() >= 20)
+		{
+			myTDE.getSpriteEntityByStorageID(3).attachTo(myTDE.getSpriteEntityByStorageID(2));
+		}
 
 		/*for (int i = 1; i < 6; ++i)
 		{
