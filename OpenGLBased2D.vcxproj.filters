@@ -39,9 +39,6 @@
     <ClCompile Include="2Dlib\Texture\Texture.cpp">
       <Filter>Файлы ресурсов</Filter>
     </ClCompile>
-    <ClCompile Include="2Dlib\Transform\Transform.cpp">
-      <Filter>Файлы ресурсов</Filter>
-    </ClCompile>
     <ClCompile Include="2Dlib\Transform\Transformable.cpp">
       <Filter>Файлы ресурсов</Filter>
     </ClCompile>
@@ -75,6 +72,27 @@
     <ClCompile Include="additionalFunctions\additionalFunctions.inl">
       <Filter>Файлы ресурсов</Filter>
     </ClCompile>
+    <ClCompile Include="2Dlib\Effector\Effector.cpp">
+      <Filter>Файлы ресурсов</Filter>
+    </ClCompile>
+    <ClCompile Include="OpenGLWrappers\VertexArray.cpp">
+      <Filter>Файлы ресурсов</Filter>
+    </ClCompile>
+    <ClCompile Include="2Dlib\InstancingFeatures\IRWindow\IRWindow.cpp">
+      <Filter>Файлы ресурсов</Filter>
+    </ClCompile>
+    <ClCompile Include="additionalFunctions\2DMMath\mat3glm.inl">
+      <Filter>Файлы ресурсов</Filter>
+    </ClCompile>
+    <ClCompile Include="2Dlib\InstancingFeatures\TempDrawableEntitysStorage\TDEStorage.cpp">
+      <Filter>Файлы ресурсов</Filter>
+    </ClCompile>
+    <ClCompile Include="2Dlib\InstancingFeatures\ITextureStorage\ITexStorage.cpp">
+      <Filter>Файлы ресурсов</Filter>
+    </ClCompile>
+    <ClCompile Include="2Dlib\Transform\Transform.cpp">
+      <Filter>Файлы ресурсов</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -99,9 +117,6 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="2Dlib\Texture\Texture.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
-    <ClInclude Include="2Dlib\Transform\Transform.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="2Dlib\Transform\Transformable.hpp">
@@ -135,6 +150,27 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="additionalFunctions\additionalFunctions.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="2Dlib\Effector\Effector.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="OpenGLWrappers\VertexArray.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="2Dlib\InstancingFeatures\TempDrawableEntitysStorage\TDEStorage.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="2Dlib\InstancingFeatures\IRWindow\IRWindow.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="additionalFunctions\2DMMath\mat3glm.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="2Dlib\InstancingFeatures\ITextureStorage\ITexStorage.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="2Dlib\Transform\Transform.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

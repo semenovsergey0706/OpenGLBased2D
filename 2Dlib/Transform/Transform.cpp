@@ -1,62 +1,66 @@
 #include "Transform.hpp"
 
-constexpr glm::mat4 baseTransform(1.0f);
-
-Transform::Transform() : m_tMat(glm::mat4(1))
+Transform::Transform() : m_transformMat(glm::mat3(1))
 {
 }
 
 Transform& Transform::scale(float x, float y) noexcept
 {
-    m_tMat = glm::scale(m_tMat, glm::vec3(x, y, 1.0f));
+    glm::scaleThis(m_transformMat, glm::vec2(x, y));
     return *this;
 }
 
 Transform& Transform::scale(const glm::vec2& scale) noexcept
 {
-    m_tMat = glm::scale(m_tMat, glm::vec3((scale), 1.0f));
+    glm::scaleThis(m_transformMat, scale);
     return *this;
 }
 
 Transform& Transform::rotate(float rotation) noexcept
 {
-    static glm::vec3 axis(0.0f, 0.0f, 1.0f);
-    m_tMat =  glm::rotate(m_tMat, glm::radians(rotation), axis);
+    glm::rotateThis(m_transformMat, glm::radians(rotation));
     return *this;
 }
 
 void Transform::clear()
 {
-    m_tMat = baseTransform;
+    m_transformMat = glm::mat3(1.0f);
 }
 
 Transform& Transform::shift(float x, float y) noexcept
 {
-    m_tMat = glm::translate(m_tMat, glm::vec3(x, y, 1.0f));
+    glm::translateThis(m_transformMat, glm::vec2(x, y));
     return *this;
 }
 
 Transform& Transform::shift(const glm::vec2& shift) noexcept
 {
-    m_tMat = glm::translate(m_tMat, glm::vec3((shift), 1.0f));
+    glm::translateThis(m_transformMat, shift);
     return *this;
 }
 
 Transform Transform::getInverse()
 {
     Transform inverse;
-    inverse.m_tMat = glm::inverse(m_tMat);
+    inverse.m_transformMat = glm::inverse(m_transformMat);
     return inverse;
 }
 
 void Transform::genInverse(Transform& inversed)
 {
-    inversed.m_tMat = glm::inverse(m_tMat);
+    inversed.m_transformMat = glm::inverse(m_transformMat);
 }
 
 Transform& Transform::operator=(const Transform& transform)
 {
     if (this == &transform) return *this;
-    m_tMat = transform.m_tMat;
+
+    m_transformMat = transform.m_transformMat;
+
     return *this;
+}
+
+const glm::mat3& Transform::getTransformMatrix() const
+{
+    return m_transformMat;
 }

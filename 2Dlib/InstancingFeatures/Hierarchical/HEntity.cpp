@@ -2,7 +2,7 @@
 #include "../../../additionalFunctions/additionalFunctions.hpp"
 
 
-HEntity::HEntity(int id) :  Entity(id),
+HEntity::HEntity() :        Entity(),
                             m_order(0), 
                             m_storageParentID(-1), 
                             m_rqPlace(-1), 
@@ -10,23 +10,43 @@ HEntity::HEntity(int id) :  Entity(id),
                             m_fullRelativesNum(0), 
                             m_hLevel(0),
                             m_storageID(-1),
-                            parentStorage(nullptr)
+                            m_parentStorage(nullptr)
 {
 }
 
-void HEntity::decRQPlace(int delta)
+HEntity::HEntity(HEntity &&entity) noexcept  :      Entity(std::move(entity)),
+                                                    m_order(entity.m_order), 
+                                                    m_storageParentID(entity.m_storageParentID), 
+                                                    m_rqPlace(entity.m_rqPlace), 
+                                                    m_parentVectorID(entity.m_parentVectorID), 
+                                                    m_fullRelativesNum(entity.m_fullRelativesNum), 
+                                                    m_hLevel(entity.m_hLevel),
+                                                    m_storageID(entity.m_storageID),
+                                                    m_parentStorage(std::move(entity.m_parentStorage)) 
 {
-    m_rqPlace -= delta;
+
 }
 
-void HEntity::incRQPlace(int delta)
+void HEntity::updateHierarchyLevelWithCheck()
 {
-    m_rqPlace += delta;
+    if (m_storageParentID == -1)
+    {
+        m_hLevel = 0;
+        this->updateChildsHierarchyLevel();
+    }
+    else this->updateHierarchyLevel();
 }
 
-void HEntity::setRQPlace(int delta)
+//void setOrder(int order)
+//{
+//    if (order == m_order) return;
+//
+//    m_new_order = order;
+//}
+
+void HEntity::store(TDEStorage* storage)
 {
-    m_rqPlace = delta;
+    m_parentStorage = storage;
 }
 
 const int HEntity::getParentID()
@@ -34,7 +54,7 @@ const int HEntity::getParentID()
     return m_storageParentID;
 }
 
-const std::vector<PriorityData<int, int>>& HEntity::getChilds()
+const std::vector<std::pair<int, int>>& HEntity::getChilds()
 {
     return m_childsID;
 }
@@ -53,3 +73,5 @@ bool HEntity::operator<(const HEntity& entity) const
 {
     return m_order < entity.m_order;
 }
+
+

@@ -11,7 +11,9 @@ private:
 	GLuint m_textureID;
 public:
 	TextureObj() noexcept;
+	TextureObj(TextureObj &&obj) noexcept;
 	void bind() noexcept;
+	const GLuint get() const;
 	void unbind() noexcept;
 	virtual ~TextureObj() noexcept;
 };

@@ -1,6 +1,13 @@
 #include "Entity.hpp"
 
-Entity::Entity(int id)
+Entity::Entity() : m_entityID(-1)
+{
+}
+
+Entity::Entity(Entity &&entity) noexcept : m_entityID(std::move(entity.m_entityID))
+{}
+
+void Entity::setID(int id)
 {
 	m_entityID = id;
 }

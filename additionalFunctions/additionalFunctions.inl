@@ -6,9 +6,16 @@
 template <class T>
 int ordered_push(std::vector<T> &targetVector, T data)
 {
-	auto index = std::find_if(targetVector.begin(), targetVector.end(), [&](T& object) { return data < object; });
-	targetVector.insert(index, data);
-	return (index -  targetVector.begin());
+	if (targetVector.empty())
+	{
+		targetVector.push_back(data);
+		return 0;
+	}
+		
+	int index = std::find_if(targetVector.begin(), targetVector.end(), [&](T& object) { return data < object; }) - targetVector.begin();
+
+	targetVector.insert(targetVector.begin() + index, data);
+	return index;
 }
 
 template <class T>
@@ -16,13 +23,13 @@ int updateElementPos(std::vector<T>& targetVector, int pos)
 {
 	if (pos > 0 && targetVector[pos] < targetVector[pos - 1])
 	{
-		T temp = targetVector[pos];
-
 		if (pos == 1)
 		{
 			std::swap(targetVector[pos], targetVector[pos - 1]);
 			return 0;
 		}
+
+		T temp = targetVector[pos];
 
 		for (int j = pos - 2; j >= 0; --j)
 		{
@@ -40,13 +47,13 @@ int updateElementPos(std::vector<T>& targetVector, int pos)
 	}
 	else if (pos + 1 < targetVector.size() && targetVector[pos + 1] < targetVector[pos])
 	{
-		T temp = targetVector[pos];
-
 		if (pos == targetVector.size() - 2)
 		{
 			std::swap(targetVector[pos], targetVector[pos + 1]);
 			return targetVector.size() - 1;
 		}
+
+		T temp = targetVector[pos];
 
 		for (int j = pos + 2; j < targetVector.size(); ++j)
 		{
@@ -62,7 +69,7 @@ int updateElementPos(std::vector<T>& targetVector, int pos)
 		targetVector[targetVector.size() - 1] = temp;
 		return targetVector.size() - 1;
 	}
-	else return -1;
+	else return pos;
 }
 
 #endif // ! ADDITIONAL_FUNCTIONS_INL

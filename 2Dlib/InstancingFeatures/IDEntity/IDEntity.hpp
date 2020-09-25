@@ -13,12 +13,18 @@ private:
 	bool m_visible = true;
 	bool m_isColorUpdated = false;
 
-	void updateVisible();
-	void updateTransfNeeded();
-	void updateColor();
+	//void updateVisible();
+	int m_transformID;
+	void inheritTransform();
+	void inheritTransformWithCheck();
+	void updateAllChildsTransformMatrix();
+	void updateTransformed();
+	void updateTransformedSequence(int old_hLevel);
+	//void updateColor();
 
 public:
-	IDEntity(int id);
+	IDEntity();
+	IDEntity(IDEntity &&entity) noexcept;
 	void setVisible(bool visible);
 	bool isVisible() const;
 
@@ -44,7 +50,9 @@ public:
 	void attachTo(HEntity& pEntity);
 	void attachTo(IDEntity& pEntity);
 
-	void detach();
+	//void detach();
 
 	virtual ~IDEntity();
+
+	friend TDEStorage;
 };

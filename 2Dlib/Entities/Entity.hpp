@@ -9,7 +9,9 @@ class Entity : public NonCopyable
 protected:
 	int m_entityID;
 public:
-	Entity(int id = -1);
+	Entity();
+	Entity(Entity &&entity) noexcept;
+	void setID(int id);
 	const int getEntityID() const noexcept;
 	virtual ~Entity() = default;
 };

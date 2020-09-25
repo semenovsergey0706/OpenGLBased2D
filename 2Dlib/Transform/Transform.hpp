@@ -1,11 +1,13 @@
-#include <glm/glm.hpp>
-#include <glm/gtc/matrix_transform.hpp>
-#include <glm/gtc/type_ptr.hpp>
+#pragma once
+#include "../../additionalFunctions/2DMMath/mat3glm.hpp"
+
+class TDEStorage;
+class IDEntity;
 
 class Transform
 {
 private:
-	glm::mat4 m_tMat;
+	glm::mat3 m_transformMat;
 public:
 	Transform();
 	Transform& shift(float x, float y) noexcept;
@@ -18,6 +20,8 @@ public:
 	void genInverse(Transform& inversed);
 
 	Transform& operator=(const Transform &transform);
+	const glm::mat3& getTransformMatrix() const;
 
-	//friend DEStorage;
+	friend TDEStorage;
+	friend IDEntity;
 };

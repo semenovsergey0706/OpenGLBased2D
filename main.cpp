@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <cmath>
 // GLEW
 #define GLEW_STATIC
 #include <GL/glew.h>
@@ -17,264 +18,109 @@
 #include "2Dlib/RenderWindow/RenderWindow.hpp"
 
 #include <vector>
+#include "2Dlib/InstancingFeatures/DrawableEntitysStorage/DEStorage.hpp"
+#include "2Dlib/InstancingFeatures/TempDrawableEntitysStorage/TDEStorage.hpp"
+#include "additionalFunctions/2DMMath/mat3glm.hpp"
+#include "2Dlib/InstancingFeatures/ITextureStorage/ITexStorage.hpp"
+#include <glm/gtx/string_cast.hpp>
 
+#include <chrono>
 
-// Function prototypes
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+class Timer
+{
+private:
 
-// Window dimensions
-const GLuint WIDTH = 900, HEIGHT = 600;
+	using clock_t = std::chrono::high_resolution_clock;
+	using second_t = std::chrono::duration<double, std::ratio<1> >;
 
-// The MAIN function, from here we start the application and run the game loop
+	std::chrono::time_point<clock_t> m_beg;
+
+public:
+	Timer() : m_beg(clock_t::now())
+	{
+	}
+
+	void reset()
+	{
+		m_beg = clock_t::now();
+	}
+
+	double elapsed() const
+	{
+		return std::chrono::duration_cast<second_t>(clock_t::now() - m_beg).count();
+	}
+};
+
 int main()
 {
-    std::cout << sizeof(glm::vec4);
-    //// Init GLFW
-    //glfwInit();
-    //// Set all the required options for GLFW
-    //glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 3);
-    //glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
-    //glfwWindowHint(GLFW_OPENGL_PROFILE, GLFW_OPENGL_CORE_PROFILE);
-    //glfwWindowHint(GLFW_RESIZABLE, GL_FALSE);
+	IRWindow myWindow(1024, 1024, "MyWindow");
+	TDEStorage myTDE(360, myWindow);
+	ITexStorage myTS;
 
-    //// Create a GLFWwindow object that we can use for GLFW's functions
-    //GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "LearnOpenGL", nullptr, nullptr);
-    //glfwMakeContextCurrent(window);
-
-    //// Set the required callback functions
-    //glfwSetKeyCallback(window, key_callback);
-
-    //// Set this to true so GLEW knows to use a modern approach to retrieving function pointers and extensions
-    //glewExperimental = GL_TRUE;
-    //// Initialize GLEW to setup the OpenGL Function pointers
-    //glewInit();
-
-    //// Define the viewport dimensions
-    //glViewport(0, 0, WIDTH, HEIGHT);
-
-    RenderWindow window(1024, 768, "myWIndow");
-
-    glewExperimental = GL_TRUE;
-    if (glewInit() == GLEW_OK) std::cout << "ok";
-
-    // Build and compile our shader program
-    logl_shader ourShader("default.vs", "default.frag", true);
+	for (int i = 0; i < 360; ++i)
+	{
+		if (i%2 == 0) myTS.loadTexture("redRec.png", 1);
+		else myTS.loadTexture("blueRec.png", 2);
+	}
 
 
+	for(int i = 0; i < 360; ++i) myTDE.CreateSpriteEntity();
 
-    // Set up vertex data (and buffer(s)) and attribute pointers
-    GLfloat vertices[] = {
-        // Positions          // Colors           // Texture Coords
-         0.33f,  0.33f, 0.0f,    1.0f, 1.0f,   // Верхний правый
-         0.33f, -0.33f, 0.0f,    1.0f, 0.0f,   // Нижний правый
-        -0.33f, -0.33f, 0.0f,    0.0f, 0.0f,   // Нижний левый
-        -0.33f,  0.33f, 0.0f,    0.0f, 1.0f    // Верхний левый
-    };
-    GLuint indices[] = {  // Note that we start from 0!
-        0, 1, 3, // First Triangle
-        1, 2, 3  // Second Triangle
-    };
-    GLuint VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
+	ISEntity* sprite;
+	for (int i = 1; i < 360; ++i)
+	{
+		sprite = &myTDE.getSpriteEntityByStorageID(i);
+		sprite->setPosition(64, 64);
+		sprite->setOrigin(0, 0);
+		//sprite->setRotation(i);
+		sprite->attachTo(myTDE.getSpriteEntityByStorageID(i-1));
+	}
 
-    glBindVertexArray(VAO);
+	sprite = &myTDE.getSpriteEntityByStorageID(0);
+	sprite->setPosition(0, 0);
+	sprite->setOrigin(64, 64);
 
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+		
+    std::shared_ptr<logl_shader> myShader = std::make_shared<logl_shader>("temp_shader.vs", "temp_shader.frag", true);
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
+    myTDE.setShader(myShader);
+	myTS.bindStorageTextures(myShader, "m_samplers");
 
-    // Position attribute
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)0);
-    glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-    glEnableVertexAttribArray(0);   // Color attribute
-    glEnableVertexAttribArray(1);
+	Timer t;
 
-    glBindVertexArray(0); // Unbind VAO
+	//bool center_1 = false;
+	//float scale = 1.0f;
 
-    glm::vec4 colorData[9] =
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	float angle = 0;
+    while (!glfwWindowShouldClose(myWindow.get()))
     {
-        glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
-        glm::vec4(1.0f, 0.0f, 0.0f, 1.0f),
-        glm::vec4(0.0f, 1.0f, 0.0f, 1.0f),
-        glm::vec4(0.0f, 0.0f, 1.0f, 1.0f),
-        glm::vec4(1.0f, 1.0f, 0.0f, 1.0f),
-        glm::vec4(1.0f, 0.0f, 1.0f, 1.0f),
-        glm::vec4(0.0f, 1.0f, 1.0f, 1.0f),
-        glm::vec4(1.0f, 1.0f, 1.0f, 1.0f),
-        glm::vec4(0.0f, 0.0f, 0.0f, 1.0f),
-    };
+        glfwPollEvents();		
+		glClear(GL_COLOR_BUFFER_BIT);
+		
+		angle = fmod(t.elapsed() * 60, 360);
+		sprite = &myTDE.getSpriteEntityByStorageID(0);
+		sprite->setRotation(angle);
 
-    GLuint UBO;
-    glGenBuffers(1, &UBO);
-    glBindBuffer(GL_UNIFORM_BUFFER, UBO);
-    glBufferData(GL_UNIFORM_BUFFER, 9 * sizeof(glm::vec4), &colorData, GL_DYNAMIC_DRAW);
+		sprite = &myTDE.getSpriteEntityByStorageID(1);
+		sprite->setRotation(-angle);
 
+		/*for (int i = 1; i < 6; ++i)
+		{
+			sprite = &myTDE.getSpriteEntityByStorageID(i);
+			sprite->setRotation(-angle);
+		}*/
 
-    for (int i = 0; i < 8; i++) colorData[i] = colorData[i + 1];
-    colorData[8] = glm::vec4(1.0f, 0.0f, 0.0f, 1.0f);
+		////scale = t.elapsed() * 0.3;
+		////if (scale > 3.0)
+		////{
+		////	scale = 1.0f;
+		////	t.reset();
+		////}
+		//sprite->setScale(scale, scale);
+        myTDE.drawStorageData();
 
+        glfwSwapBuffers(myWindow.get());
 
-    GLuint UBO2;
-    glGenBuffers(1, &UBO2);
-    glBindBuffer(GL_UNIFORM_BUFFER, UBO2);
-    glBufferData(GL_UNIFORM_BUFFER, 9 * sizeof(glm::vec4), &colorData, GL_DYNAMIC_DRAW);
-
-
-    GLuint bindedBuffer = glGetUniformLocation(ourShader.get(), "colorData");
-    //glUniformBufferEXT(ourShader.Program, bindedBuffer, UBO);
-
-    float shift[] =
-    {
-        0.0f, 0.0f,
-        0.66f, 0.0f,
-        0.0f, 0.66f,
-        0.66f, 0.66f,
-       -0.66f, 0.0f,
-        0.0f, -0.66f,
-        -0.66f, -0.66f,
-        0.66f, -0.66f,
-        -0.66f, 0.66f,
-    };
-
-    GLuint UBO1;
-    glGenBuffers(1, &UBO1);
-    glBindBuffer(GL_UNIFORM_BUFFER, UBO1);
-    glBufferData(GL_UNIFORM_BUFFER, 18 * sizeof(float), &shift, GL_STATIC_DRAW);
-
-    GLuint bindedBuffer1 = glGetUniformLocation(ourShader.get(), "shiftData");
-    glUniformBufferEXT(ourShader.get(), bindedBuffer1, UBO1);
-
-    glBindBuffer(GL_UNIFORM_BUFFER, UBO);
-    glUniformBufferEXT(ourShader.get(), bindedBuffer, UBO);
-
- 
-    ourShader.Use();
-
-    bool newBuffer = false;
-
-    unsigned int texture;
-    glGenTextures(1, &texture);
-    glBindTexture(GL_TEXTURE_2D, texture);
-
-    // Устанавливаем параметры наложения и фильтрации текстур (для текущего связанного объекта текстуры)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    // Загрузка и генерация текстуры
-    int width, height, nrChannels;
-    unsigned char* data = stbi_load("container.jpg", &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
     }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-
-    unsigned int texture2;
-    glGenTextures(1, &texture2);
-    glBindTexture(GL_TEXTURE_2D, texture2);
-
-    // Устанавливаем параметры наложения и фильтрации текстур (для текущего связанного объекта текстуры)
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-    glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-    data = stbi_load("img.jpg", &width, &height, &nrChannels, 0);
-    if (data)
-    {
-        glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, data);
-        glGenerateMipmap(GL_TEXTURE_2D);
-    }
-    else
-    {
-        std::cout << "Failed to load texture" << std::endl;
-    }
-    stbi_image_free(data);
-
-    glBindTexture(GL_TEXTURE_2D, 0);
-
-    //GLuint m_TextureIds[2]; // the textures
-// On init after creating the textures
-    GLuint64EXT* m_TextureHandles = new GLuint64[2];
-    //for (int i = 0; i < 2; ++i)
-    //{
-    //    m_TextureHandles[i] = glGetTextureHandleNV(texture);
-    //    glMakeTextureHandleResidentNV(m_TextureHandles[i]);
-    //}
-
-    m_TextureHandles[0] = glGetTextureHandleNV(texture);
-    glMakeTextureHandleResidentNV(m_TextureHandles[0]);
-
-    m_TextureHandles[1] = glGetTextureHandleNV(texture2);
-    glMakeTextureHandleResidentNV(m_TextureHandles[1]);
-
-    GLuint handleSamplersLocation(glGetUniformLocation(ourShader.get(), "samplers"));
-    glUniform1ui64vNV(handleSamplersLocation, 2, m_TextureHandles);
-
-
-
-
-
-
-    while (!glfwWindowShouldClose(window.get()))
-    {
-        //glActiveTexture(GL_TEXTURE0);
-        //glBindTexture(GL_TEXTURE_2D, texture);
-        //glUniform1i(glGetUniformLocation(ourShader.Program, "ourTexture1"), 0);
-
-        glfwPollEvents();
-        glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        /*if (!newBuffer)
-        {
-            std::cout << "1";
-            glBindBuffer(GL_UNIFORM_BUFFER, UBO);
-            glUniformBufferEXT(ourShader.Program, bindedBuffer, UBO);
-            newBuffer = true;
-        }
-        else
-        {
-            std::cout << "2";
-            glBindBuffer(GL_UNIFORM_BUFFER, UBO2);
-            glUniformBufferEXT(ourShader.Program, bindedBuffer, UBO2);
-            newBuffer = false;
-        }*/
-
-
-        glBindVertexArray(VAO);
-        //glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
-
-        glDrawElementsInstanced(GL_TRIANGLES, 650000, GL_UNSIGNED_INT, NULL, 6);
-        glBindVertexArray(0);
-
-        glfwSwapBuffers(window.get());
-    }
-
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
-
-    //glfwTerminate();
-    return 0;
-}
-
-// Is called whenever a key is pressed/released via GLFW
-void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
-{
-    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
-        glfwSetWindowShouldClose(window, GL_TRUE);
 }

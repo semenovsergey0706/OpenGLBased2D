@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include <GL/glew.h>
+#include "../InterfaceClasses/NonCopyable.hpp"
 
 class logl_shader
 {
@@ -19,6 +20,7 @@ private:
 
 public:
     logl_shader(const GLchar* vertex, const GLchar* fragment, bool formFile);
+    logl_shader(logl_shader&& shader);
     const GLuint get() const;
     void Use();
     virtual ~logl_shader();

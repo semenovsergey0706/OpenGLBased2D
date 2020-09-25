@@ -17,5 +17,5 @@ void main()
 	tCoord = texCoord;
 	instID = gl_InstanceID; 
 	//gl_Position = vec4(position.x + shiftData[gl_InstanceID*2], position.y+shiftData[gl_InstanceID*2+1], position.z, 1.0f);
-	gl_Position.xy = position.xy;
+	gl_Position.xy = position.xy*2;
 }

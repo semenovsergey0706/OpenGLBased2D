@@ -85,6 +85,14 @@ logl_shader::logl_shader(const GLchar* vertex, const GLchar* fragment, bool form
 	else initFromStr(vertex, fragment);
 }
 
+logl_shader::logl_shader(logl_shader&& shader)
+{
+	if (&shader == this) return;
+
+	this->m_shaderProgram = shader.m_shaderProgram;
+	shader.m_shaderProgram = -1;
+}
+
 const GLuint logl_shader::get() const
 {
 	return this->m_shaderProgram;

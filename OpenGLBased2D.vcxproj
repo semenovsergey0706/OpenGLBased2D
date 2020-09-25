@@ -147,6 +147,7 @@
   <ItemGroup>
     <ClCompile Include="2Dlib\DataStructures\Color\Color.cpp" />
     <ClCompile Include="2Dlib\DataStructures\PriorityData\PriorityData.cpp" />
+    <ClCompile Include="2Dlib\Effector\Effector.cpp" />
     <ClCompile Include="2Dlib\Entities\Drawable\DEntity.cpp" />
     <ClCompile Include="2Dlib\Entities\Drawable\SpriteEntity\SpriteEntity.cpp" />
     <ClCompile Include="2Dlib\Entities\Entity.cpp" />
@@ -154,10 +155,14 @@
     <ClCompile Include="2Dlib\InstancingFeatures\Hierarchical\HEntity.cpp" />
     <ClCompile Include="2Dlib\InstancingFeatures\IDEntity\IDEntity.cpp" />
     <ClCompile Include="2Dlib\InstancingFeatures\InsSpriteEntity\ISEntity.cpp" />
+    <ClCompile Include="2Dlib\InstancingFeatures\IRWindow\IRWindow.cpp" />
+    <ClCompile Include="2Dlib\InstancingFeatures\ITextureStorage\ITexStorage.cpp" />
+    <ClCompile Include="2Dlib\InstancingFeatures\TempDrawableEntitysStorage\TDEStorage.cpp" />
     <ClCompile Include="2Dlib\RenderWindow\RenderWindow.cpp" />
     <ClCompile Include="2Dlib\Texture\Texture.cpp" />
     <ClCompile Include="2Dlib\Transform\Transform.cpp" />
     <ClCompile Include="2Dlib\Transform\Transformable.cpp" />
+    <ClCompile Include="additionalFunctions\2DMMath\mat3glm.inl" />
     <ClCompile Include="additionalFunctions\additionalFunctions.inl" />
     <ClCompile Include="External\logl_shader.cpp" />
     <ClCompile Include="External\stb_image.cpp" />
@@ -165,6 +170,7 @@
     <ClCompile Include="main.cpp" />
     <ClCompile Include="OpenGLWrappers\BufferObj.inl" />
     <ClCompile Include="OpenGLWrappers\TextureObj.inl" />
+    <ClCompile Include="OpenGLWrappers\VertexArray.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -172,6 +178,7 @@
   <ItemGroup>
     <ClInclude Include="2Dlib\DataStructures\Color\Color.hpp" />
     <ClInclude Include="2Dlib\DataStructures\PriorityData\PriorityData.hpp" />
+    <ClInclude Include="2Dlib\Effector\Effector.hpp" />
     <ClInclude Include="2Dlib\Entities\Drawable\DEntity.hpp" />
     <ClInclude Include="2Dlib\Entities\Drawable\SpriteEntity\SpriteEntity.hpp" />
     <ClInclude Include="2Dlib\Entities\Entity.hpp" />
@@ -179,16 +186,21 @@
     <ClInclude Include="2Dlib\InstancingFeatures\Hierarchical\HEntity.hpp" />
     <ClInclude Include="2Dlib\InstancingFeatures\IDEntity\IDEntity.hpp" />
     <ClInclude Include="2Dlib\InstancingFeatures\InsSpriteEntity\ISEntity.hpp" />
+    <ClInclude Include="2Dlib\InstancingFeatures\IRWindow\IRWindow.hpp" />
+    <ClInclude Include="2Dlib\InstancingFeatures\ITextureStorage\ITexStorage.hpp" />
+    <ClInclude Include="2Dlib\InstancingFeatures\TempDrawableEntitysStorage\TDEStorage.hpp" />
     <ClInclude Include="2Dlib\RenderWindow\RenderWindow.hpp" />
     <ClInclude Include="2Dlib\Texture\Texture.hpp" />
     <ClInclude Include="2Dlib\Transform\Transform.hpp" />
     <ClInclude Include="2Dlib\Transform\Transformable.hpp" />
+    <ClInclude Include="additionalFunctions\2DMMath\mat3glm.hpp" />
     <ClInclude Include="additionalFunctions\additionalFunctions.hpp" />
     <ClInclude Include="External\logl_shader.hpp" />
     <ClInclude Include="External\stb_image.h" />
     <ClInclude Include="InterfaceClasses\NonCopyable.hpp" />
     <ClInclude Include="OpenGLWrappers\BufferObj.hpp" />
     <ClInclude Include="OpenGLWrappers\TextureObj.hpp" />
+    <ClInclude Include="OpenGLWrappers\VertexArray.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

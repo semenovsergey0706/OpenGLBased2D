@@ -1,29 +1,27 @@
 #pragma once
 #include <array>
 #include "Transform.hpp"
+#include "../RenderWindow/RenderWindow.hpp"
 
+class TDEStorage;
 
-class DEStorage;
-
-enum class TFM_PROPERTIES
-{
-	TFM_ORIGIN,
-	TFM_POSITION,
-	TFM_SCALE
-};
-
-class BaseTransformable
+class Transformable
 {
 private:
-	std::array<glm::vec4, 3> m_tPropData;
-	Transform m_transform;
-	Transform m_invTransform;
+	glm::vec2 m_position;
+	glm::vec2 m_origin;
+	glm::vec2 m_scale;
 	float m_rotation;
+	
+	Transform m_invTransform;
+
 protected:
-	void updateTransform();
+	Transform m_transform;
+	
+	void updateTransform(RenderWindow* m_rWindow, const glm::vec2 &p_origin = glm::vec2(0, 0));
 	void updateITransform();
 public:
-	BaseTransformable();
+	Transformable();
 	void setOrigin(float x, float y);
 	void setOrigin(const glm::vec2& pos);
 	void setPosition(float x, float y);
@@ -45,16 +43,16 @@ public:
 
 	const Transform& getTransform() const;
 	const Transform& getInverseTransform() const;
-	virtual ~BaseTransformable() = default;
+	virtual ~Transformable() = default;
 
-	friend DEStorage;
+	friend TDEStorage;
 };
 
-class Transformable : public BaseTransformable
+/*class Transformable : public BaseTransformable
 {
 protected:
-	bool m_isTfmUpdNeeded = false;
-	bool m_isInvTfmUpdNeeded = false;
+	bool m_transformUpdate = false;
+	bool m_invTransformUpdate = false;
 
 	void upUpdateFlag();
 	void updateTransform();
@@ -76,5 +74,5 @@ public:
 	void rotate(float angle);
 	virtual ~Transformable() = default;
 
-	friend DEStorage;
-};
+	friend TDEStorage;
+};*/

@@ -1,219 +1,210 @@
 #include "Transformable.hpp"
 
-void BaseTransformable::updateTransform()
-{
-	m_transform.clear();
-	m_transform.shift(m_tPropData[1]);
-	m_transform.rotate(m_rotation);
-	m_transform.scale(m_tPropData[2]);
-	m_transform.shift(m_tPropData[0]);
-}
 
-void BaseTransformable::updateITransform()
+void Transformable::updateTransform(RenderWindow* m_rWindow, const glm::vec2 &p_origin)
 {
-	 m_transform.genInverse(m_invTransform);
-}
-
-BaseTransformable::BaseTransformable()
-{
-	m_tPropData[0] = glm::vec4(0, 0, 0, 1);
-	m_tPropData[1] = glm::vec4(0, 0, 0, 1);
-	m_tPropData[2] = glm::vec4(1, 1, 0, 1);
-	m_rotation = 0;
-	updateTransform();
-	updateITransform();
-}
-
-void BaseTransformable::setOrigin(float x, float y)
-{
-	m_tPropData[0].x = x;
-	m_tPropData[0].y = y;
-}
-
-void BaseTransformable::setOrigin(const glm::vec2& pos)
-{
-	m_tPropData[0].x = pos.x;
-	m_tPropData[0].y = pos.y;
-}
-
-void BaseTransformable::setPosition(float x, float y)
-{
-	m_tPropData[1].x = x;
-	m_tPropData[1].y = y;
-}
-
-void BaseTransformable::setPosition(const glm::vec2& pos)
-{
-	m_tPropData[1].x = pos.x;
-	m_tPropData[1].y = pos.y;
-}
-
-void BaseTransformable::setScale(float x, float y)
-{
-	m_tPropData[2].x = x;
-	m_tPropData[2].y = y;
-}
-
-void BaseTransformable::setScale(const glm::vec2& pos)
-{
-	m_tPropData[2].x = pos.x;
-	m_tPropData[2].y = pos.y;
-}
-
-void BaseTransformable::setRotation(float angle)
-{
-	m_rotation = angle;
-}
-
-void BaseTransformable::move(float x, float y)
-{
-	m_tPropData[1].x += x;
-	m_tPropData[1].y += y;
-}
-
-void BaseTransformable::move(const glm::vec2& pos)
-{
-	m_tPropData[1].x += pos.x;
-	m_tPropData[1].y += pos.y;
-}
-
-void BaseTransformable::scale(float x, float y)
-{
-	m_tPropData[2].x *= x;
-	m_tPropData[2].y *= y;
-}
-
-void BaseTransformable::scale(const glm::vec2& pos)
-{
-	m_tPropData[2].x *= pos.x;
-	m_tPropData[2].y *= pos.y;
-}
-
-void BaseTransformable::rotate(float angle)
-{
-	m_rotation += angle;
-}
-
-const glm::vec2& BaseTransformable::getOrigin() const
-{
-	return m_tPropData[0];
-}
-
-const glm::vec2& BaseTransformable::getPosition() const
-{
-	return m_tPropData[1];
-}
-
-const glm::vec2& BaseTransformable::getScale() const
-{
-	return m_tPropData[2];
-}
-
-const float BaseTransformable::getRotation() const
-{
-	return m_rotation;
-}
-
-const Transform& BaseTransformable::getTransform() const
-{
-	return m_transform;
-}
-
-const Transform& BaseTransformable::getInverseTransform() const
-{
-	return m_invTransform;
-}
-
-void Transformable::upUpdateFlag()
-{
-	m_isTfmUpdNeeded = true;
-	m_isInvTfmUpdNeeded = true;
-}
-
-void Transformable::updateTransform()
-{
-	BaseTransformable::updateTransform();
-	m_isTfmUpdNeeded = false;
+	m_transform.shift(m_rWindow->normalizePos(m_position + p_origin));
+	m_transform.rotate(m_rotation);	
+	m_transform.shift(m_rWindow->normalizeOrigPos(m_origin));
+	m_transform.scale(m_scale);
 }
 
 void Transformable::updateITransform()
 {
-	BaseTransformable::updateITransform();
-	m_isInvTfmUpdNeeded = false;
+	 m_transform.genInverse(m_invTransform);
 }
 
-Transformable::Transformable() : BaseTransformable()
+Transformable::Transformable() : m_position(0,0), m_origin(0,0), m_scale(1, 1), m_rotation(0), m_transform()
+{
+	updateITransform();
+}
+
+void Transformable::setOrigin(float x, float y)
+{
+	m_origin.x = x;
+	m_origin.y = y;
+}
+
+void Transformable::setOrigin(const glm::vec2& pos)
+{
+	m_origin = pos;
+}
+
+void Transformable::setPosition(float x, float y)
+{
+	m_position.x = x;
+	m_position.y = y;
+}
+
+void Transformable::setPosition(const glm::vec2& pos)
+{
+	m_position = pos;
+}
+
+void Transformable::setScale(float x, float y)
+{
+	m_scale.x = x;
+	m_scale.y = y;
+}
+
+void Transformable::setScale(const glm::vec2& scale)
+{
+	m_scale = scale;
+}
+
+void Transformable::setRotation(float angle)
+{
+	m_rotation = angle;
+}
+
+void Transformable::move(float x, float y)
+{
+	m_position.x += x;
+	m_position.y += y;
+}
+
+void Transformable::move(const glm::vec2& pos)
+{
+	m_position += pos;
+}
+
+void Transformable::scale(float x, float y)
+{
+	m_scale.x *= x;
+	m_scale.y *= y;
+}
+
+void Transformable::scale(const glm::vec2& scale)
+{
+	m_scale *= scale;
+}
+
+void Transformable::rotate(float angle)
+{
+	m_rotation += angle;
+}
+
+const glm::vec2& Transformable::getOrigin() const
+{
+	return m_origin;
+}
+
+const glm::vec2& Transformable::getPosition() const
+{
+	return m_position;
+}
+
+const glm::vec2& Transformable::getScale() const
+{
+	return m_scale;
+}
+
+const float Transformable::getRotation() const
+{
+	return m_rotation;
+}
+
+const Transform& Transformable::getTransform() const
+{
+	return m_transform;
+}
+
+const Transform& Transformable::getInverseTransform() const
+{
+	return m_invTransform;
+}
+/*
+void Transformable::upUpdateFlag()
+{
+	m_transformUpdate = true;
+	m_invTransformUpdate = true;
+}
+
+void Transformable::updateTransform()
+{
+	Transformable::updateTransform();
+	m_transformUpdate = false;
+}
+
+void Transformable::updateITransform()
+{
+	Transformable::updateITransform();
+	m_invTransformUpdate = false;
+}
+
+Transformable::Transformable() : Transformable()
 {
 }
 
 void Transformable::setOrigin(float x, float y)
 {
-	BaseTransformable::setOrigin(x, y);
+	Transformable::setOrigin(x, y);
 	upUpdateFlag();
 }
 
 void Transformable::setOrigin(const glm::vec2& pos)
 {
-	BaseTransformable::setOrigin(pos);
+	Transformable::setOrigin(pos);
 	upUpdateFlag();
 }
 
 void Transformable::setPosition(float x, float y)
 {
-	BaseTransformable::setPosition(x,y);
+	Transformable::setPosition(x,y);
 	upUpdateFlag();
 }
 
 void Transformable::setPosition(const glm::vec2& pos)
 {
-	BaseTransformable::setPosition(pos);
+	Transformable::setPosition(pos);
 	upUpdateFlag();
 }
 
 void Transformable::setScale(float x, float y)
 {
-	BaseTransformable::setScale(x, y);
+	Transformable::setScale(x, y);
 	upUpdateFlag();
 }
 
 void Transformable::setScale(const glm::vec2& pos)
 {
-	BaseTransformable::setScale(pos);
+	Transformable::setScale(pos);
 	upUpdateFlag();
 }
 
 void Transformable::setRotation(float angle)
 {
-	BaseTransformable::setRotation(angle);
+	Transformable::setRotation(angle);
 	upUpdateFlag();
 }
 
 void Transformable::move(float x, float y)
 {
-	BaseTransformable::move(x, y);
+	Transformable::move(x, y);
 	upUpdateFlag();
 }
 
 void Transformable::move(const glm::vec2& pos)
 {
-	BaseTransformable::move(pos);
+	Transformable::move(pos);
 	upUpdateFlag();
 }
 
 void Transformable::scale(float x, float y)
 {
-	BaseTransformable::scale(x, y);
+	Transformable::scale(x, y);
 	upUpdateFlag();
 }
 
 void Transformable::scale(const glm::vec2& pos)
 {
-	BaseTransformable::scale(pos);
+	Transformable::scale(pos);
 	upUpdateFlag();
 }
 
 void Transformable::rotate(float angle)
 {
-	BaseTransformable::rotate(angle);
+	Transformable::rotate(angle);
 	upUpdateFlag();
 }
+*/

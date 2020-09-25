@@ -1,6 +1,7 @@
 #ifndef T_OBJ_INL_GUARD
 #define T_OBJ_INL_GUARD
 
+#include <utility>
 #include "TextureObj.hpp"
 
 template<GLenum textureType>
@@ -10,9 +11,20 @@ inline TextureObj<textureType>::TextureObj() noexcept
 }
 
 template<GLenum textureType>
+inline TextureObj<textureType>::TextureObj(TextureObj &&obj) noexcept : m_textureID(std::move(obj.m_textureID))
+{
+}
+
+template<GLenum textureType>
 inline void TextureObj<textureType>::bind() noexcept
 {
 	glBindTexture(textureType, m_textureID);
+}
+
+template<GLenum textureType>
+inline const GLuint TextureObj<textureType>::get() const
+{
+	return m_textureID;
 }
 
 template<GLenum textureType>
