@@ -13,6 +13,7 @@ class TDEStorage
 {
 private:
 	int m_spritesCapacity;
+	bool m_renderSequenceChanged = false;
 
 	IRWindow *m_rWindow;
 	std::shared_ptr<logl_shader> m_stShader = nullptr;
@@ -23,17 +24,26 @@ private:
 	BufferObj<GL_UNIFORM_BUFFER> m_eTransformDataBuffer;
 	BufferObj<GL_UNIFORM_BUFFER> m_eColorBuffer;
 
+	BufferObj<GL_UNIFORM_BUFFER> m_renderSequenceBuffer;
+
 	std::vector<std::vector<int>> m_eTransformUpdate;
+	std::vector<int> m_eOrderUpdate;
+
+	std::vector<int> m_renderSequence;
 
 	void initBuffers();
-	//void updateTransformed(int eHierLvl, int id);		
+	void updateRenderSequencePosition(int old_pos, int new_pos, int len);		
 	void updateTransformations();
+	void updateOrders();
 
 	template <class T>
-	void updateSubBufferData(BufferObj<GL_UNIFORM_BUFFER> &buffer, const T &data, int elem_pos);
+	void updateSubBufferData(const T &data, int elem_pos);
 
 	template <>
-	void updateSubBufferData(BufferObj<GL_UNIFORM_BUFFER> &buffer, const glm::mat3 &data, int elem_pos);
+	void updateSubBufferData(const glm::mat3 &data, int elem_pos);
+
+	template <class T>
+	void updateSubBufferData(BufferObj<GL_UNIFORM_BUFFER> &buffer, const std::vector<T> &data, int shift);
 	
 public:
 
@@ -55,11 +65,16 @@ public:
 
 	void drawStorageData();
 
+	friend int HEntity::calculateNewRenderSequencePos();
+	friend void HEntity::updateParentChildsOrderData(unsigned int prevPos);
 	friend void HEntity::updateHierarchyLevel();
 	friend void HEntity::updateChildsHierarchyLevel();
 	friend virtual void HEntity::attachTo(HEntity &pEntity);
 	friend void HEntity::updatePrevParentChildsData();
+	friend void HEntity::updatePrevParentRelativesData();
 	friend void HEntity::updateNewParentChildsData();
+	friend void HEntity::updateNewParentRelativesData();
+	friend void HEntity::setOrder(int order);
 	friend void IDEntity::updateTransformed();
 	friend void IDEntity::updateTransformedSequence(int old_hLevel);
 	friend void IDEntity::inheritTransform();

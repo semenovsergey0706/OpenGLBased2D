@@ -15,6 +15,42 @@ void TDEStorage::initBuffers()
 
     std::vector<glm::vec4> m_eColorData(m_spritesCapacity, glm::vec4(1.0f));
     this->defaultInitBuffer(m_eColorBuffer, m_eColorData);
+
+    std::vector<int> m_renderData(m_spritesCapacity, 1);
+    this->defaultInitBuffer(m_renderSequenceBuffer, m_renderData);
+}
+
+void TDEStorage::updateRenderSequencePosition(int old_pos, int new_pos, int len)
+{
+   int delta = old_pos - new_pos;
+   if (delta == 0) return;
+
+   m_renderSequenceChanged = true;
+
+   int opl = old_pos + len;
+   int npl = new_pos + len;    
+
+   std::vector<int> temp(m_renderSequence.begin() + old_pos, m_renderSequence.begin() + opl);
+
+   for (int i = 0; i < temp.size(); ++i) 
+       m_spriteEntities[temp[i]].m_rqPlace -= delta;
+
+   if (delta < 0)
+   {       
+        for (int i = opl; i < opl - delta; ++i)
+            m_spriteEntities[m_renderSequence[i]].m_rqPlace -= len;
+
+        memmove(&m_renderSequence[old_pos], &m_renderSequence[opl], (-delta) * sizeof(int));
+   }       
+   else
+   {
+        for (int i = new_pos; i < npl + delta; ++i)
+            m_spriteEntities[m_renderSequence[i]].m_rqPlace += len;
+
+        memmove(&m_renderSequence[npl], &m_renderSequence[new_pos], delta * sizeof(int));
+   }       
+
+   memmove(&m_renderSequence[new_pos], &temp[0], len * sizeof(int));
 }
 
 void TDEStorage::updateTransformations()
@@ -36,7 +72,7 @@ void TDEStorage::updateTransformations()
             if (currUpdatingEntity->m_transformID == -1) continue;
 
             currUpdatingEntity->inheritTransformWithCheck();
-            updateSubBufferData(m_eTransformDataBuffer, currUpdatingEntity->m_transform.m_transformMat, m_eTransformUpdate[i][j]);
+            updateSubBufferData(currUpdatingEntity->m_transform.m_transformMat, m_eTransformUpdate[i][j]);
             currUpdatingEntity->updateAllChildsTransformMatrix();
         }
         m_eTransformUpdate[i].clear();
@@ -46,18 +82,52 @@ void TDEStorage::updateTransformations()
     m_eTransformDataBuffer.unbind();
 }
 
+void TDEStorage::updateOrders()
+{
+    if (m_eOrderUpdate.empty()) return;
+
+    for (int i = 0; i < m_eOrderUpdate.size(); ++i)
+    {
+        if (m_spriteEntities[m_eOrderUpdate[i]].m_new_order < 0) continue;
+
+        m_spriteEntities[m_eOrderUpdate[i]].updateOrderWithoutCheck();
+
+        int prevPos = m_spriteEntities[m_eOrderUpdate[i]].m_parentVectorID;
+        m_spriteEntities[m_spriteEntities[m_eOrderUpdate[i]].m_storageParentID].m_childsID[prevPos].first = m_spriteEntities[m_eOrderUpdate[i]].m_order;
+        m_spriteEntities[m_eOrderUpdate[i]].m_parentVectorID = updateElementPos(m_spriteEntities[m_spriteEntities[m_eOrderUpdate[i]].m_storageParentID].m_childsID, prevPos);
+
+        if (prevPos == m_spriteEntities[m_eOrderUpdate[i]].m_parentVectorID) continue;
+
+        m_spriteEntities[m_eOrderUpdate[i]].updateParentChildsOrderData(prevPos);
+
+        this->updateRenderSequencePosition( m_spriteEntities[m_eOrderUpdate[i]].m_rqPlace, 
+                                            m_spriteEntities[m_eOrderUpdate[i]].calculateNewRenderSequencePos(),
+                                            m_spriteEntities[m_eOrderUpdate[i]].m_fullRelativesNum + 1);
+    }
+
+    m_eOrderUpdate.clear();
+}
+
 template <class T>
-void TDEStorage::updateSubBufferData(BufferObj<GL_UNIFORM_BUFFER> &buffer, const T &data, int elem_pos)
+void TDEStorage::updateSubBufferData(const T &data, int elem_pos)
 {
      glBufferSubData(GL_UNIFORM_BUFFER, elem_pos * sizeof(data), sizeof(data), &data);
 }
 
 template <>
-void TDEStorage::updateSubBufferData(BufferObj<GL_UNIFORM_BUFFER> &buffer,const glm::mat3 &data, int elem_pos)
+void TDEStorage::updateSubBufferData(const glm::mat3 &data, int elem_pos)
 {
     glBufferSubData(GL_UNIFORM_BUFFER, (GLM_MAT3_SIZE_IN_BUFFER * elem_pos),  GLM_MAT3_RAW_SIZE_IN_BUFFER, &data[0]);
     glBufferSubData(GL_UNIFORM_BUFFER, (GLM_MAT3_SIZE_IN_BUFFER * elem_pos) + GLM_MAT3_RAW_SIZE_IN_BUFFER, GLM_MAT3_RAW_SIZE_IN_BUFFER, &data[1]);
     glBufferSubData(GL_UNIFORM_BUFFER, (GLM_MAT3_SIZE_IN_BUFFER * elem_pos) + 2* GLM_MAT3_RAW_SIZE_IN_BUFFER, GLM_MAT3_RAW_SIZE_IN_BUFFER, &data[2]);
+}
+
+template <class T>
+void TDEStorage::updateSubBufferData(BufferObj<GL_UNIFORM_BUFFER> &buffer, const std::vector<T> &data, int shift)
+{
+    buffer.bind();
+    glBufferSubData(GL_UNIFORM_BUFFER, shift * sizeof(T), data.size() * sizeof(T), data.data());
+    buffer.unbind();
 }
 
 TDEStorage::TDEStorage(int spritesCapacity, IRWindow &window_) : m_rWindow(&window_), m_spritesCapacity(spritesCapacity)
@@ -72,6 +142,7 @@ void TDEStorage::loadShader(const GLchar* vsPath, const GLchar* fragPath)
     defaultBindBuffer(m_eRectSizeDataBuffer, "m_rectSize");
     defaultBindBuffer(m_eTransformDataBuffer, "m_transform");
     defaultBindBuffer(m_eColorBuffer, "m_color");
+    defaultBindBuffer(m_renderSequenceBuffer, "m_renderID");
 }
 
 void TDEStorage::setShader(std::shared_ptr<logl_shader> shader)
@@ -81,6 +152,7 @@ void TDEStorage::setShader(std::shared_ptr<logl_shader> shader)
     defaultBindBuffer(m_eRectSizeDataBuffer, "m_rectSize");
     defaultBindBuffer(m_eTransformDataBuffer, "m_transform");
     defaultBindBuffer(m_eColorBuffer, "m_color");
+    defaultBindBuffer(m_renderSequenceBuffer, "m_renderID");
 }
 
 template <class T>
@@ -113,6 +185,7 @@ void TDEStorage::defaultBindBuffer(BufferObj<GL_UNIFORM_BUFFER>& targetBuffer, c
     targetBuffer.bind();
     GLuint uniLoc = glGetUniformLocation(m_stShader->get(), fieldName);
     glUniformBufferEXT(m_stShader->get(), uniLoc, targetBuffer.get());
+    targetBuffer.unbind();
 }
 
 void TDEStorage::CreateSpriteEntity()
@@ -122,6 +195,11 @@ void TDEStorage::CreateSpriteEntity()
     m_spriteEntities.emplace_back();
     m_spriteEntities.back().store(this);
     m_spriteEntities.back().m_storageID = m_spriteEntities.size()-1;
+
+    m_renderSequence.push_back(m_spriteEntities.back().m_storageID);
+    m_spriteEntities.back().m_rqPlace = m_renderSequence.size()-1;
+
+    m_renderSequenceChanged = true;
 }
 
 ISEntity& TDEStorage::getSpriteEntityByID(int id)
@@ -137,12 +215,43 @@ ISEntity& TDEStorage::getSpriteEntityByStorageID(int id)
 
 void TDEStorage::drawStorageData()
 {
+    this->updateOrders();
     this->updateTransformations();
+
+    if (m_renderSequenceChanged)
+         updateSubBufferData(m_renderSequenceBuffer, m_renderSequence, 0);
+
+    m_renderSequenceChanged = false;
 
     m_stShader->Use();
     (m_rWindow->getGenPixelVAO()).bind();
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL, m_spriteEntities.size());
     (m_rWindow->getGenPixelVAO()).unbind();
+}
+
+int HEntity::calculateNewRenderSequencePos()
+{
+    HEntity& parentEntity = m_parentStorage->m_spriteEntities[m_storageParentID];
+    if (m_parentVectorID == 0)
+        return m_parentStorage->m_spriteEntities[m_storageParentID].m_rqPlace + 1;
+    else
+        return  m_parentStorage->m_spriteEntities[parentEntity.m_childsID[m_parentVectorID-1].second].m_rqPlace +
+                m_parentStorage->m_spriteEntities[parentEntity.m_childsID[m_parentVectorID-1].second].m_fullRelativesNum + 1;
+}
+
+void HEntity::updateParentChildsOrderData(unsigned int prevPos)
+{
+ 
+   if(prevPos > m_parentVectorID)
+   {
+       for (int i = m_parentVectorID + 1; i <= prevPos; ++i)
+           ++m_parentStorage->m_spriteEntities[m_parentStorage->m_spriteEntities[m_storageParentID].m_childsID[i].second].m_parentVectorID;
+   }
+   else
+   {
+       for (int i = prevPos; i < m_parentVectorID; ++i)
+           --m_parentStorage->m_spriteEntities[m_parentStorage->m_spriteEntities[m_storageParentID].m_childsID[i].second].m_parentVectorID;
+   }
 }
 
 void HEntity::updateChildsHierarchyLevel()
@@ -157,6 +266,20 @@ void HEntity::updateHierarchyLevel()
     m_hLevel = m_parentStorage->m_spriteEntities[m_storageParentID].m_hLevel + 1;
     this->updateChildsHierarchyLevel();    
 }
+/////////////////////////////////////////////////////////////////////////////////////////////////
+void HEntity::updatePrevParentRelativesData()
+{
+    if (m_storageParentID == -1) return;
+
+    HEntity* parent = this;
+    int relativesDelta = m_fullRelativesNum + 1;
+
+    do
+    {
+       parent = &m_parentStorage->m_spriteEntities[parent->m_storageParentID];
+       parent->m_fullRelativesNum -= relativesDelta;
+    } while (parent->m_storageParentID != -1);  
+}
 
 void HEntity::updatePrevParentChildsData()
 {
@@ -166,9 +289,19 @@ void HEntity::updatePrevParentChildsData()
 
    parent.m_childsID.erase(parent.m_childsID.begin() + m_parentVectorID);
    for (int i = m_parentVectorID; i < parent.m_childsID.size(); ++i)
-       --m_parentStorage->m_spriteEntities[parent.m_childsID[i].second].m_parentVectorID; 
+       --m_parentStorage->m_spriteEntities[parent.m_childsID[i].second].m_parentVectorID;  
+}
 
-   //this->updateRNumPParent();    
+void HEntity::updateNewParentRelativesData()
+{
+   HEntity* parent = this;
+   int relativesDelta = m_fullRelativesNum + 1;
+
+   do
+   {
+       parent = &m_parentStorage->m_spriteEntities[parent->m_storageParentID];
+       parent->m_fullRelativesNum += relativesDelta;
+   } while (parent->m_storageParentID != -1);  
 }
 
 void HEntity::updateNewParentChildsData()
@@ -179,17 +312,36 @@ void HEntity::updateNewParentChildsData()
     for (int i = m_parentVectorID + 1; i < parent.m_childsID.size(); ++i)
         ++m_parentStorage->m_spriteEntities[parent.m_childsID[i].second].m_parentVectorID;
 }
+/////////////////////////////////////////////////////////////////////////////////////////////////
 
-void HEntity::attachTo(HEntity &pEntity)
+void HEntity::attachTo(HEntity &parentEntity)
 {
-    if (m_storageParentID == pEntity.m_storageID) return;
+    if (m_storageParentID == parentEntity.m_storageID) return;
 
     this->updatePrevParentChildsData();
+    this->updatePrevParentRelativesData();
 
-    m_storageParentID = pEntity.m_storageID;
+    m_storageParentID = parentEntity.m_storageID;
+
+    this->updateOrderSafely();
+    
     this->updateNewParentChildsData();
+    this->updateNewParentRelativesData();     
+
+    m_parentStorage->updateRenderSequencePosition(m_rqPlace, this->calculateNewRenderSequencePos(), m_fullRelativesNum+1);
 
     this->updateHierarchyLevel();
+}
+
+void HEntity::setOrder(int order)
+{
+   if (order == m_order) return;
+
+   assert(order >= 0 && "Order can't be < 0");
+
+   if (m_new_order < 0) m_parentStorage->m_eOrderUpdate.push_back(m_storageID);
+   
+   m_new_order = order;   
 }
 
 void IDEntity::updateTransformed()
@@ -235,8 +387,7 @@ void IDEntity::updateAllChildsTransformMatrix()
     for (int i = 0; i < m_childsID.size(); ++i)
     {
         m_parentStorage->m_spriteEntities[m_childsID[i].second].inheritTransform();
-        m_parentStorage->updateSubBufferData(m_parentStorage->m_eTransformDataBuffer, 
-                                                m_parentStorage->m_spriteEntities[m_childsID[i].second].m_transform.m_transformMat, 
+        m_parentStorage->updateSubBufferData(   m_parentStorage->m_spriteEntities[m_childsID[i].second].m_transform.m_transformMat, 
                                                 m_childsID[i].second);
         m_parentStorage->m_spriteEntities[m_childsID[i].second].updateAllChildsTransformMatrix();
     }

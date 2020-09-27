@@ -3,6 +3,7 @@
 
 
 HEntity::HEntity() :        Entity(),
+                            m_new_order(-1),
                             m_order(0), 
                             m_storageParentID(-1), 
                             m_rqPlace(-1), 
@@ -15,6 +16,7 @@ HEntity::HEntity() :        Entity(),
 }
 
 HEntity::HEntity(HEntity &&entity) noexcept  :      Entity(std::move(entity)),
+                                                    m_new_order(entity.m_new_order),
                                                     m_order(entity.m_order), 
                                                     m_storageParentID(entity.m_storageParentID), 
                                                     m_rqPlace(entity.m_rqPlace), 
@@ -27,6 +29,18 @@ HEntity::HEntity(HEntity &&entity) noexcept  :      Entity(std::move(entity)),
 
 }
 
+void HEntity::updateOrderWithoutCheck()
+{
+    m_order = m_new_order;
+    m_new_order = -1;
+}
+
+void HEntity::updateOrderSafely()
+{
+    if (m_new_order == -1) return;
+    this->updateOrderWithoutCheck();
+}
+
 void HEntity::updateHierarchyLevelWithCheck()
 {
     if (m_storageParentID == -1)
@@ -36,13 +50,6 @@ void HEntity::updateHierarchyLevelWithCheck()
     }
     else this->updateHierarchyLevel();
 }
-
-//void setOrder(int order)
-//{
-//    if (order == m_order) return;
-//
-//    m_new_order = order;
-//}
 
 void HEntity::store(TDEStorage* storage)
 {

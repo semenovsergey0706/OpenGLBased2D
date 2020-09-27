@@ -19,7 +19,6 @@ protected:
 	std::vector<std::pair<int, int>> m_childsID;
 
 private:
-	bool m_orderWillUpdate;
 	int m_new_order;
 
 	int m_rqPlace;//
@@ -27,14 +26,23 @@ private:
 		
 	int m_fullRelativesNum;
 	int m_parentVectorID;
+
+	int calculateNewRenderSequencePos();
+
+	void updateParentChildsOrderData(unsigned int prevPos);
+	void updateOrderWithoutCheck();
+	void updateOrderSafely();
 	
 	void updateChildsHierarchyLevel();
 	void updateHierarchyLevel();
 	void updateHierarchyLevelWithCheck();
 	//void updateRNumPParent();
 	//void updateRNumCParent();
+	void updatePrevParentRelativesData();
 	void updatePrevParentChildsData();
+	void updateNewParentRelativesData();
 	void updateNewParentChildsData();
+
 public:
 	HEntity();
 	HEntity(HEntity &&entity) noexcept;

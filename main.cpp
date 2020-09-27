@@ -107,14 +107,15 @@ int main()
 		sprite->setRotation(-angle);
 
 
-		if (!retach && t.elapsed() >= 10)
+		if (!retach && t.elapsed() >= 1)
 		{
 			myTDE.getSpriteEntityByStorageID(3).attachTo(myTDE.getSpriteEntityByStorageID(0));
 			retach = true;
 		}
-		else if (retach && t.elapsed() >= 20)
+		else if (retach && t.elapsed() >= 2)
 		{
-			myTDE.getSpriteEntityByStorageID(3).attachTo(myTDE.getSpriteEntityByStorageID(2));
+			myTDE.getSpriteEntityByStorageID(1).attachTo(myTDE.getSpriteEntityByStorageID(3));
+			myTDE.getSpriteEntityByStorageID(1).setOrder(3);
 		}
 
 		/*for (int i = 1; i < 6; ++i)
