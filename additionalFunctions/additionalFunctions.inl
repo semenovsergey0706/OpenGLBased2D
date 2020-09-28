@@ -37,11 +37,11 @@ int updateElementPos(std::vector<T>& targetVector, int pos)
 			{
 				memmove(&(targetVector[j + 2]), &(targetVector[j + 1]), (pos - j - 1) * sizeof(T));
 				targetVector[j + 1] = temp;
-				return j+1;
+				return j + 1;
 			}
 		}
 
-		memmove(&(targetVector[1]), &(targetVector[0]), (targetVector.size() - 1) * sizeof(T));
+		memmove(&(targetVector[1]), &(targetVector[0]), pos * sizeof(T));
 		targetVector[0] = temp;
 		return 0;
 	}
@@ -59,13 +59,13 @@ int updateElementPos(std::vector<T>& targetVector, int pos)
 		{
 			if (targetVector[pos] < targetVector[j])
 			{
-				memmove(&(targetVector[pos]), &(targetVector[pos + 1]), (j - 1 - pos) * sizeof(T));
+				memmove(&(targetVector[pos]), &(targetVector[pos + 1]), (j - pos - 1) * sizeof(T));
 				targetVector[j - 1] = temp;
 				return j - 1;
 			}
 		}
 
-		memmove(&(targetVector[pos]), &(targetVector[pos + 1]), (targetVector.size() - pos) * sizeof(T));
+		memmove(&(targetVector[pos]), &(targetVector[pos + 1]), (targetVector.size() - pos - 1) * sizeof(T));
 		targetVector[targetVector.size() - 1] = temp;
 		return targetVector.size() - 1;
 	}
