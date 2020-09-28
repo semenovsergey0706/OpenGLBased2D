@@ -35,10 +35,11 @@ void HEntity::updateOrderWithoutCheck()
     m_new_order = -1;
 }
 
-void HEntity::updateOrderSafely()
+bool HEntity::updateOrderSafely()
 {
-    if (m_new_order == -1) return;
+    if (m_new_order == -1) return false;
     this->updateOrderWithoutCheck();
+    return true;
 }
 
 void HEntity::updateHierarchyLevelWithCheck()

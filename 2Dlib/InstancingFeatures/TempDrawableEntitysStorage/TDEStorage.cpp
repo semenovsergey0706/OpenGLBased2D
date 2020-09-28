@@ -27,30 +27,24 @@ void TDEStorage::updateRenderSequencePosition(int old_pos, int new_pos, int len)
 
    m_renderSequenceChanged = true;
 
-   int opl = old_pos + len;
-   int npl = new_pos + len;    
-
-   std::vector<int> temp(m_renderSequence.begin() + old_pos, m_renderSequence.begin() + opl);
-
-   for (int i = 0; i < temp.size(); ++i) 
-       m_spriteEntities[temp[i]].m_rqPlace -= delta;
+   std::vector<int> temp(m_renderSequence.begin() + old_pos, m_renderSequence.begin() + old_pos + len + 1);
 
    if (delta < 0)
    {       
-        for (int i = opl; i < opl - delta; ++i)
-            m_spriteEntities[m_renderSequence[i]].m_rqPlace -= len;
+      memmove(&m_renderSequence[old_pos], &m_renderSequence[old_pos + len + 1], ((-delta) - len) * sizeof(int));
+      memmove(&m_renderSequence[old_pos + ((-delta) - len)], &temp[0], (len+1) * sizeof(int));
 
-        memmove(&m_renderSequence[old_pos], &m_renderSequence[opl], (-delta) * sizeof(int));
+      for (int i = old_pos; i <= old_pos - delta; ++i)
+        m_spriteEntities[m_renderSequence[i]].m_rqPlace = i;
    }       
    else
    {
-        for (int i = new_pos; i < npl + delta; ++i)
-            m_spriteEntities[m_renderSequence[i]].m_rqPlace += len;
+        memmove(&m_renderSequence[new_pos + len + 1], &m_renderSequence[new_pos], delta * sizeof(int));
+        memmove(&m_renderSequence[new_pos], &temp[0], (len+1) * sizeof(int));
 
-        memmove(&m_renderSequence[npl], &m_renderSequence[new_pos], delta * sizeof(int));
-   }       
-
-   memmove(&m_renderSequence[new_pos], &temp[0], len * sizeof(int));
+        for (int i = new_pos; i <= old_pos + len; ++i)
+          m_spriteEntities[m_renderSequence[i]].m_rqPlace = i;
+   }
 }
 
 void TDEStorage::updateTransformations()
@@ -102,7 +96,7 @@ void TDEStorage::updateOrders()
 
         this->updateRenderSequencePosition( m_spriteEntities[m_eOrderUpdate[i]].m_rqPlace, 
                                             m_spriteEntities[m_eOrderUpdate[i]].calculateNewRenderSequencePos(),
-                                            m_spriteEntities[m_eOrderUpdate[i]].m_fullRelativesNum + 1);
+                                            m_spriteEntities[m_eOrderUpdate[i]].m_fullRelativesNum );
     }
 
     m_eOrderUpdate.clear();
@@ -236,7 +230,7 @@ int HEntity::calculateNewRenderSequencePos()
         return m_parentStorage->m_spriteEntities[m_storageParentID].m_rqPlace + 1;
     else
         return  m_parentStorage->m_spriteEntities[parentEntity.m_childsID[m_parentVectorID-1].second].m_rqPlace +
-                m_parentStorage->m_spriteEntities[parentEntity.m_childsID[m_parentVectorID-1].second].m_fullRelativesNum + 1;
+                m_parentStorage->m_spriteEntities[parentEntity.m_childsID[m_parentVectorID-1].second].m_fullRelativesNum;
 }
 
 void HEntity::updateParentChildsOrderData(unsigned int prevPos)
@@ -323,12 +317,13 @@ void HEntity::attachTo(HEntity &parentEntity)
 
     m_storageParentID = parentEntity.m_storageID;
 
-    this->updateOrderSafely();
+    bool orderUpdated = this->updateOrderSafely();
     
     this->updateNewParentChildsData();
     this->updateNewParentRelativesData();     
 
-    m_parentStorage->updateRenderSequencePosition(m_rqPlace, this->calculateNewRenderSequencePos(), m_fullRelativesNum+1);
+    if (orderUpdated) 
+      m_parentStorage->updateRenderSequencePosition(m_rqPlace, this->calculateNewRenderSequencePos(), m_fullRelativesNum);
 
     this->updateHierarchyLevel();
 }

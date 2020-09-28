@@ -31,7 +31,7 @@ private:
 
 	void updateParentChildsOrderData(unsigned int prevPos);
 	void updateOrderWithoutCheck();
-	void updateOrderSafely();
+	bool updateOrderSafely();
 	
 	void updateChildsHierarchyLevel();
 	void updateHierarchyLevel();
