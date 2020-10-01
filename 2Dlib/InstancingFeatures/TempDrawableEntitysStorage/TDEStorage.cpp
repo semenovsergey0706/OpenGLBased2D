@@ -23,27 +23,28 @@ void TDEStorage::initBuffers()
 void TDEStorage::updateRenderSequencePosition(int old_pos, int new_pos, int len)
 {
    int delta = old_pos - new_pos;
-   if (delta == 0) return;
+   if (delta == 0 || delta == 1) 
+       return;
 
    m_renderSequenceChanged = true;
 
    std::vector<int> temp(m_renderSequence.begin() + old_pos, m_renderSequence.begin() + old_pos + len + 1);
 
    if (delta < 0)
-   {       
+   {
       memmove(&m_renderSequence[old_pos], &m_renderSequence[old_pos + len + 1], ((-delta) - len) * sizeof(int));
-      memmove(&m_renderSequence[old_pos + ((-delta) - len)], &temp[0], (len+1) * sizeof(int));
+      memmove(&m_renderSequence[new_pos - len], &temp[0], (len + 1) * sizeof(int));
 
-      for (int i = old_pos; i <= old_pos - delta; ++i)
-        m_spriteEntities[m_renderSequence[i]].m_rqPlace = i;
+      for (int i = old_pos; i < new_pos + 1; ++i)
+        m_spriteEntities[m_renderSequence[i]].m_rqPlace = i; 
    }       
    else
    {
-        memmove(&m_renderSequence[new_pos + len + 1], &m_renderSequence[new_pos], delta * sizeof(int));
-        memmove(&m_renderSequence[new_pos], &temp[0], (len+1) * sizeof(int));
+      memmove(&m_renderSequence[new_pos + len + 2], &m_renderSequence[new_pos + 1], (delta-1) * sizeof(int));
+      memmove(&m_renderSequence[new_pos + 1], &temp[0], (len + 1) * sizeof(int));
 
-        for (int i = new_pos; i <= old_pos + len; ++i)
-          m_spriteEntities[m_renderSequence[i]].m_rqPlace = i;
+      for (int i = new_pos + 1; i < old_pos + len + 1; ++i)
+        m_spriteEntities[m_renderSequence[i]].m_rqPlace = i;
    }
 }
 
@@ -70,8 +71,7 @@ void TDEStorage::updateTransformations()
             currUpdatingEntity->updateAllChildsTransformMatrix();
         }
         m_eTransformUpdate[i].clear();
-    }
-    
+    }   
 
     m_eTransformDataBuffer.unbind();
 }
@@ -132,7 +132,7 @@ TDEStorage::TDEStorage(int spritesCapacity, IRWindow &window_) : m_rWindow(&wind
 
 void TDEStorage::loadShader(const GLchar* vsPath, const GLchar* fragPath)
 {
-	m_stShader = std::make_shared<logl_shader>(vsPath, fragPath, true);
+    m_stShader = std::make_shared<logl_shader>(vsPath, fragPath, true);
     defaultBindBuffer(m_eRectSizeDataBuffer, "m_rectSize");
     defaultBindBuffer(m_eTransformDataBuffer, "m_transform");
     defaultBindBuffer(m_eColorBuffer, "m_color");
@@ -227,7 +227,7 @@ int HEntity::calculateNewRenderSequencePos()
 {
     HEntity& parentEntity = m_parentStorage->m_spriteEntities[m_storageParentID];
     if (m_parentVectorID == 0)
-        return m_parentStorage->m_spriteEntities[m_storageParentID].m_rqPlace + 1;
+        return m_parentStorage->m_spriteEntities[m_storageParentID].m_rqPlace;
     else
         return  m_parentStorage->m_spriteEntities[parentEntity.m_childsID[m_parentVectorID-1].second].m_rqPlace +
                 m_parentStorage->m_spriteEntities[parentEntity.m_childsID[m_parentVectorID-1].second].m_fullRelativesNum;
@@ -317,13 +317,12 @@ void HEntity::attachTo(HEntity &parentEntity)
 
     m_storageParentID = parentEntity.m_storageID;
 
-    bool orderUpdated = this->updateOrderSafely();
+    this->updateOrderWithoutCheck();
     
     this->updateNewParentChildsData();
-    this->updateNewParentRelativesData();     
+    this->updateNewParentRelativesData();
 
-    if (orderUpdated) 
-      m_parentStorage->updateRenderSequencePosition(m_rqPlace, this->calculateNewRenderSequencePos(), m_fullRelativesNum);
+    m_parentStorage->updateRenderSequencePosition(m_rqPlace, this->calculateNewRenderSequencePos(), m_fullRelativesNum);
 
     this->updateHierarchyLevel();
 }
@@ -352,8 +351,13 @@ void IDEntity::updateTransformedSequence(int old_hLevel)
 {
     if (old_hLevel == m_hLevel) return;
 
-    if (m_transformID != -1) 
+    if (m_transformID != -1)
+    {
         m_parentStorage->m_eTransformUpdate[old_hLevel].erase(m_parentStorage->m_eTransformUpdate[old_hLevel].begin() + m_transformID);
+        for (int i = 0; i < m_parentStorage->m_eTransformUpdate[old_hLevel].size(); ++i)
+            m_parentStorage->m_spriteEntities[m_parentStorage->m_eTransformUpdate[old_hLevel][i]].m_transformID = i;
+    }
+        
     this->updateTransformed();
 }
 

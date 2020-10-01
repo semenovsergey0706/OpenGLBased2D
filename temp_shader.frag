@@ -15,7 +15,7 @@ out vec4 color;
 
 void main()
 {
-	color = texture(m_samplers[e_id], TexCoord) * m_color[e_id];
+	color = texture(m_samplers[e_id], TexCoord);
 	//if (t_color.a == 0) discard;
 	//color =	t_color;
 	//color = m_color[e_id];

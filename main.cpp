@@ -73,15 +73,29 @@ int main()
 		sprite = &myTDE.getSpriteEntityByStorageID(i);
 		sprite->setPosition(64, 64);
 		sprite->setOrigin(0, 0);
-		//sprite->setRotation(i);
-		sprite->attachTo(myTDE.getSpriteEntityByStorageID(i-1));
+		//sprite->setRotation(30 * i);
+		sprite->attachTo(myTDE.getSpriteEntityByStorageID(0));
+	}
+
+
+	for (int i = 6; i < 360; i += 5)
+	{
+		sprite = &myTDE.getSpriteEntityByStorageID(i);
+		myTDE.getSpriteEntityByStorageID(i - 1).attachTo(*sprite);
+		myTDE.getSpriteEntityByStorageID(i - 2).attachTo(*sprite);
+		myTDE.getSpriteEntityByStorageID(i - 3).attachTo(*sprite);
+		myTDE.getSpriteEntityByStorageID(i - 4).attachTo(*sprite);
+	}
+
+	for (int i = 357; i < 360; i += 5)
+	{
+		myTDE.getSpriteEntityByStorageID(i).attachTo(myTDE.getSpriteEntityByStorageID(355));
 	}
 
 	sprite = &myTDE.getSpriteEntityByStorageID(0);
 	sprite->setPosition(0, 0);
 	sprite->setOrigin(64, 64);
-
-		
+	
     std::shared_ptr<logl_shader> myShader = std::make_shared<logl_shader>("temp_shader.vs", "temp_shader.frag", true);
 
     myTDE.setShader(myShader);
@@ -104,8 +118,8 @@ int main()
 		sprite = &myTDE.getSpriteEntityByStorageID(0);
 		sprite->setRotation(angle);
 
-		sprite = &myTDE.getSpriteEntityByStorageID(1);
-		sprite->setRotation(-angle);
+		//sprite = &myTDE.getSpriteEntityByStorageID(1);
+		//sprite->setRotation(-angle);
 
 
 
@@ -120,7 +134,7 @@ int main()
 			myTDE.getSpriteEntityByStorageID(1).setOrder(3);
 		}
 
-		/*if (t.elapsed() >= 2.5)*/
+		//if (t.elapsed() >= 2.5)
 			for (int i = 1; i < 360; ++i)
 			{
 				sprite2 = &myTDE.getSpriteEntityByStorageID(i);

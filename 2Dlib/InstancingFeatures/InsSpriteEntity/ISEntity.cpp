@@ -56,7 +56,8 @@ const int ISEntity::getFPS() const
 
 void ISEntity::setTextureID(int textureID)
 {
-    m_textureID = textureID;
+    if (m_textureID == textureID) return;
+     m_textureID = textureID;
 }
 
 const int ISEntity::getTextureID() const
