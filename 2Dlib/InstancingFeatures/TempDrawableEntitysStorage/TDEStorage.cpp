@@ -18,13 +18,16 @@ void TDEStorage::initBuffers()
 
     std::vector<int> m_renderData(m_spritesCapacity, 1);
     this->defaultInitBuffer(m_renderSequenceBuffer, m_renderData);
+
+    std::vector<int> m_texturesIDData(m_spritesCapacity, 0);
+    this->defaultInitBuffer(m_spriteTexturesIDBuffer, m_texturesIDData);
 }
 
 void TDEStorage::updateRenderSequencePosition(int old_pos, int new_pos, int len)
 {
-   int delta = old_pos - new_pos;
-   if (delta == 0 || delta == 1) 
-       return;
+    int delta = old_pos - new_pos;
+    if (delta == 0 || delta == 1) 
+        return;
 
    m_renderSequenceChanged = true;
 
@@ -32,19 +35,19 @@ void TDEStorage::updateRenderSequencePosition(int old_pos, int new_pos, int len)
 
    if (delta < 0)
    {
-      memmove(&m_renderSequence[old_pos], &m_renderSequence[old_pos + len + 1], ((-delta) - len) * sizeof(int));
-      memmove(&m_renderSequence[new_pos - len], &temp[0], (len + 1) * sizeof(int));
+        memmove(&m_renderSequence[old_pos], &m_renderSequence[old_pos + len + 1], ((-delta) - len) * sizeof(int));
+        memmove(&m_renderSequence[new_pos - len], &temp[0], (len + 1) * sizeof(int));
 
-      for (int i = old_pos; i < new_pos + 1; ++i)
-        m_spriteEntities[m_renderSequence[i]].m_rqPlace = i; 
+        for (int i = old_pos; i < new_pos + 1; ++i)
+            m_spriteEntities[m_renderSequence[i]].m_rqPlace = i; 
    }       
    else
    {
-      memmove(&m_renderSequence[new_pos + len + 2], &m_renderSequence[new_pos + 1], (delta-1) * sizeof(int));
-      memmove(&m_renderSequence[new_pos + 1], &temp[0], (len + 1) * sizeof(int));
+        memmove(&m_renderSequence[new_pos + len + 2], &m_renderSequence[new_pos + 1], (delta-1) * sizeof(int));
+        memmove(&m_renderSequence[new_pos + 1], &temp[0], (len + 1) * sizeof(int));
 
-      for (int i = new_pos + 1; i < old_pos + len + 1; ++i)
-        m_spriteEntities[m_renderSequence[i]].m_rqPlace = i;
+        for (int i = new_pos + 1; i < old_pos + len + 1; ++i)
+            m_spriteEntities[m_renderSequence[i]].m_rqPlace = i;
    }
 }
 
@@ -102,6 +105,55 @@ void TDEStorage::updateOrders()
     m_eOrderUpdate.clear();
 }
 
+void TDEStorage::updateTextures()
+{
+    if (m_eTextureUpdate.empty()) return;
+
+    m_spriteTexturesIDBuffer.bind();
+
+    for (int i = 0; i < m_eTextureUpdate.size(); ++i)
+    {
+        this->updateSubBufferData(m_spriteEntities[m_eTextureUpdate[i]].m_textureID, m_eTextureUpdate[i]);
+        m_spriteEntities[m_eTextureUpdate[i]].m_textureUpdate = false;
+    } 
+    
+    m_spriteTexturesIDBuffer.unbind();
+
+    this->updateRectSize();
+
+}
+
+void TDEStorage::updateRectSize()
+{
+    m_eRectSizeDataBuffer.bind();
+
+    for (int i = 0; i < m_eTextureUpdate.size(); ++i)
+    {
+        this->updateSubBufferData(this->getTextureByStorageID(m_spriteEntities[m_eTextureUpdate[i]].m_textureID).getSize(), m_eTextureUpdate[i]);
+    }
+
+    m_eRectSizeDataBuffer.unbind();
+
+    m_eTextureUpdate.clear();
+}
+
+void TDEStorage::updateColors()
+{
+    if (m_eColorUpdate.empty()) return;
+
+    m_eColorBuffer.bind();
+
+    for (int i = 0; i < m_eColorUpdate.size(); ++i)
+    {
+        this->updateSubBufferData(m_spriteEntities[m_eTextureUpdate[i]].m_eColor, m_eColorUpdate[i]);
+        m_spriteEntities[m_eTextureUpdate[i]].m_updateColor = false;
+    } 
+    
+    m_eColorBuffer.unbind();
+
+    m_eColorUpdate.clear();
+}
+
 template <class T>
 void TDEStorage::updateSubBufferData(const T &data, int elem_pos)
 {
@@ -137,6 +189,7 @@ void TDEStorage::loadShader(const GLchar* vsPath, const GLchar* fragPath)
     defaultBindBuffer(m_eTransformDataBuffer, "m_transform");
     defaultBindBuffer(m_eColorBuffer, "m_color");
     defaultBindBuffer(m_renderSequenceBuffer, "m_renderID");
+    defaultBindBuffer(m_spriteTexturesIDBuffer, "m_textureSamplerID");
 }
 
 void TDEStorage::setShader(std::shared_ptr<logl_shader> shader)
@@ -147,6 +200,7 @@ void TDEStorage::setShader(std::shared_ptr<logl_shader> shader)
     defaultBindBuffer(m_eTransformDataBuffer, "m_transform");
     defaultBindBuffer(m_eColorBuffer, "m_color");
     defaultBindBuffer(m_renderSequenceBuffer, "m_renderID");
+    defaultBindBuffer(m_spriteTexturesIDBuffer, "m_textureSamplerID");
 }
 
 template <class T>
@@ -209,6 +263,8 @@ ISEntity& TDEStorage::getSpriteEntityByStorageID(int id)
 
 void TDEStorage::drawStorageData()
 {
+    this->updateTextures();
+    this->updateColors();
     this->updateOrders();
     this->updateTransformations();
 
@@ -221,6 +277,11 @@ void TDEStorage::drawStorageData()
     (m_rWindow->getGenPixelVAO()).bind();
     glDrawElementsInstanced(GL_TRIANGLES, 6, GL_UNSIGNED_INT, NULL, m_spriteEntities.size());
     (m_rWindow->getGenPixelVAO()).unbind();
+}
+
+void TDEStorage::bindStorageTextures(const char* shaderField)
+{
+    ITexStorage::bindStorageTextures(m_stShader, shaderField);
 }
 
 int HEntity::calculateNewRenderSequencePos()
@@ -390,4 +451,22 @@ void IDEntity::updateAllChildsTransformMatrix()
                                                 m_childsID[i].second);
         m_parentStorage->m_spriteEntities[m_childsID[i].second].updateAllChildsTransformMatrix();
     }
+}
+
+void ISEntity::setTextureByStorageID(int textureID)
+{
+    if (m_textureID == textureID) return;
+
+    m_textureID = textureID;
+
+    pushWithCheck(m_textureUpdate, m_parentStorage->m_eTextureUpdate, m_storageID);
+}
+
+void IDEntity::setColor(glm::vec4 newColor)
+{
+    if (m_eColor == newColor) return;
+
+    m_eColor = newColor;
+
+    pushWithCheck(m_updateColor, m_parentStorage->m_eColorUpdate, m_storageID);
 }

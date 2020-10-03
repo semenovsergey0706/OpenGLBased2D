@@ -15,8 +15,8 @@ public:
 	ITexStorage(ITexStorage&& store) noexcept;
 	void loadTexture(const char* path, int id);
 	void bindStorageTextures(std::shared_ptr<logl_shader> m_shader, const char* shaderField);
-	const Texture* getTextureByID(int id) const;
-	const Texture* getTextureByStorageID(int id) const;
+	const Texture& getTextureByID(int id) const;
+	const Texture& getTextureByStorageID(int id) const;
 	bool isAllTexturesBinded();
 
 };

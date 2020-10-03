@@ -8,8 +8,9 @@
 #include "../../Texture/Texture.hpp"
 #include "../IRWindow/IRWindow.hpp"
 #include "../InsSpriteEntity/ISEntity.hpp"
+#include "../ITextureStorage/ITexStorage.hpp"
 
-class TDEStorage
+class TDEStorage : public ITexStorage
 {
 private:
 	int m_spritesCapacity;
@@ -25,9 +26,12 @@ private:
 	BufferObj<GL_UNIFORM_BUFFER> m_eColorBuffer;
 
 	BufferObj<GL_UNIFORM_BUFFER> m_renderSequenceBuffer;
+	BufferObj<GL_UNIFORM_BUFFER> m_spriteTexturesIDBuffer;
 
 	std::vector<std::vector<int>> m_eTransformUpdate;
 	std::vector<int> m_eOrderUpdate;
+	std::vector<int> m_eTextureUpdate;
+	std::vector<int> m_eColorUpdate;
 
 	std::vector<int> m_renderSequence;
 
@@ -35,6 +39,9 @@ private:
 	void updateRenderSequencePosition(int old_pos, int new_pos, int len);		
 	void updateTransformations();
 	void updateOrders();
+	void updateTextures();
+	void updateRectSize();
+	void updateColors();
 
 	template <class T>
 	void updateSubBufferData(const T &data, int elem_pos);
@@ -65,6 +72,10 @@ public:
 
 	void drawStorageData();
 
+	void bindStorageTextures(std::shared_ptr<logl_shader> m_shader, const char* shaderField) = delete;
+	
+	virtual void bindStorageTextures(const char* shaderField);
+
 	friend int HEntity::calculateNewRenderSequencePos();
 	friend void HEntity::updateParentChildsOrderData(unsigned int prevPos);
 	friend void HEntity::updateHierarchyLevel();
@@ -80,6 +91,8 @@ public:
 	friend void IDEntity::inheritTransform();
 	friend void IDEntity::inheritTransformWithCheck();
 	friend void IDEntity::updateAllChildsTransformMatrix();
+	friend void IDEntity::setColor(glm::vec4 newColor);
+	friend void ISEntity::setTextureByStorageID(int textureID);
 };
 
 

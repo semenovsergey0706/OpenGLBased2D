@@ -36,8 +36,6 @@ private:
 	void updateChildsHierarchyLevel();
 	void updateHierarchyLevel();
 	void updateHierarchyLevelWithCheck();
-	//void updateRNumPParent();
-	//void updateRNumCParent();
 	void updatePrevParentRelativesData();
 	void updatePrevParentChildsData();
 	void updateNewParentRelativesData();

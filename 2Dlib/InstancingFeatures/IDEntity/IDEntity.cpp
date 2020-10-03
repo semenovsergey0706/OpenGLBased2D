@@ -1,11 +1,12 @@
 #include "IDEntity.hpp"
 
-IDEntity::IDEntity() : HEntity(), Transformable(), m_visible(true), m_transformID(-1)
+IDEntity::IDEntity() : HEntity(), Transformable(), m_updateColor(false), m_visible(true), m_transformID(-1)
 {
 }
 
 IDEntity::IDEntity(IDEntity &&entity) noexcept	: 	HEntity(std::move(entity)), 
-													Transformable(std::move(entity)), 
+													Transformable(std::move(entity)),
+													m_updateColor(entity.m_updateColor), 
 													m_visible(entity.m_visible),
 													m_transformID(entity.m_transformID)
 {	
@@ -22,20 +23,13 @@ bool IDEntity::isVisible() const
 	return m_visible;
 }
 
-void IDEntity::setColor(Color newColor)
+void IDEntity::setColor(float r, float g, float b, float a)
 {
-	if (m_eColor == newColor) return;
-	//updateColor();
-	m_eColor = newColor;
-}
-
-void IDEntity::setColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a)
-{
-	Color newColor(r, g, b, a);
+	glm::vec4 newColor(r, g, b, a);
 	setColor(newColor);
 }
 
-const Color& IDEntity::getColor()
+const glm::vec4& IDEntity::getColor()
 {
 	return m_eColor;
 }

@@ -19,6 +19,10 @@ void ITexStorage::loadTexture(const char* path, int id)
 
 void ITexStorage::bindStorageTextures(std::shared_ptr<logl_shader> m_shader, const char *shaderField)
 {
+    assert(m_shader != nullptr && "shader nullptr");
+
+    if (m_allBinded) return;
+
     m_shader->Use();
     std::vector<GLuint64EXT> textures;
     for (int i = 0; i < m_texStorage.size(); ++i)
@@ -33,16 +37,16 @@ void ITexStorage::bindStorageTextures(std::shared_ptr<logl_shader> m_shader, con
     m_allBinded = true;
 }
 
-const Texture* ITexStorage::getTextureByID(int id) const
+const Texture& ITexStorage::getTextureByID(int id) const
 {
     int t_id = std::find_if(m_texStorage.begin(), m_texStorage.end(), [=](const Texture &tempTexture) { return tempTexture.getID() == id; }) - m_texStorage.begin();
-    if (t_id == m_texStorage.size()) return nullptr;
-    return &m_texStorage[t_id];
+    assert(t_id < m_texStorage.size() && "texture with current id not found");
+    return m_texStorage[t_id];
 }
 
-const Texture* ITexStorage::getTextureByStorageID(int id) const 
+const Texture& ITexStorage::getTextureByStorageID(int id) const 
 {
-    return &m_texStorage[id];
+    return m_texStorage[id];
 }
 
 bool ITexStorage::isAllTexturesBinded()

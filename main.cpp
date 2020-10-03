@@ -55,16 +55,20 @@ int main()
 {
 	IRWindow myWindow(1024, 1024, "MyWindow");
 	TDEStorage myTDE(360, myWindow);
-	ITexStorage myTS;
 
-	for (int i = 0; i < 360; ++i)
+	for (int i = 0; i < 2; ++i)
 	{
-		if (i%2 == 0) myTS.loadTexture("redRec.png", 1);
-		else myTS.loadTexture("blueRec.png", 2);
+		if (i%2 == 0) myTDE.loadTexture("redRec2.png", 1);
+		else myTDE.loadTexture("blueRec.png", 2);
 	}
 
 
-	for(int i = 0; i < 360; ++i) myTDE.CreateSpriteEntity();
+	for (int i = 0; i < 360; ++i)
+	{
+		myTDE.CreateSpriteEntity();
+		myTDE.getSpriteEntityByStorageID(i).setTextureByStorageID(i%2);
+	}
+		
 
 	ISEntity* sprite;
 	ISEntity* sprite2;
@@ -99,7 +103,8 @@ int main()
     std::shared_ptr<logl_shader> myShader = std::make_shared<logl_shader>("temp_shader.vs", "temp_shader.frag", true);
 
     myTDE.setShader(myShader);
-	myTS.bindStorageTextures(myShader, "m_samplers");
+	myTDE.bindStorageTextures("m_samplers");
+
 
 	Timer t;
 
@@ -109,6 +114,8 @@ int main()
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 	float angle = 0;
 	bool retach = false;
+	int conn = 1;
+	bool decreas = true;
     while (!glfwWindowShouldClose(myWindow.get()))
     {
         glfwPollEvents();		
@@ -140,6 +147,19 @@ int main()
 				sprite2 = &myTDE.getSpriteEntityByStorageID(i);
 				sprite2->setOrder(rand()%100);
 			}
+
+
+			myTDE.getSpriteEntityByStorageID(0).setColor(0.0, 1.0, 1.0, 1.0);
+
+
+			//if (conn == 1 && t.elapsed() >= 2.5)
+			//{
+			//	conn = 0;
+			//	t.reset();
+			//}				
+			//else conn = 1;
+			if (t.elapsed() >= 2.5)
+			myTDE.getSpriteEntityByStorageID(0).setTextureByStorageID(1);
 
 		/*for (int i = 1; i < 6; ++i)
 		{

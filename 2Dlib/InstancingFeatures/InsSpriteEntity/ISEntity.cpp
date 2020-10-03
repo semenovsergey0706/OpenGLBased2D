@@ -1,15 +1,16 @@
 #include "ISEntity.hpp"
 
-ISEntity::ISEntity() : IDEntity(), m_textureID(-1), m_frameNumber(1), m_columnNumber(1), m_rowNumber(1), m_fps(0)
+ISEntity::ISEntity() : IDEntity(), m_textureUpdate(false), m_textureID(-1), m_frameNumber(1), m_columnNumber(1), m_rowNumber(1), m_fps(0)
 {
 }
 
 ISEntity::ISEntity(ISEntity&& entity) noexcept	: 	IDEntity(std::move(entity)),
-                                                    m_textureID(std::move(entity.m_textureID)),
-													m_frameNumber(std::move(entity.m_frameNumber)),
-													m_columnNumber(std::move(entity.m_columnNumber)), 
-													m_rowNumber(std::move(entity.m_rowNumber)), 
-													m_fps(std::move(entity.m_fps))
+                                                    m_textureUpdate(entity.m_textureUpdate),
+                                                    m_textureID(entity.m_textureID),
+													m_frameNumber(entity.m_frameNumber),
+													m_columnNumber(entity.m_columnNumber), 
+													m_rowNumber(entity.m_rowNumber), 
+													m_fps(entity.m_fps)
 
 {
 }
@@ -52,12 +53,6 @@ const int ISEntity::getRowNumber() const
 const int ISEntity::getFPS() const
 {
     return m_fps;
-}
-
-void ISEntity::setTextureID(int textureID)
-{
-    if (m_textureID == textureID) return;
-     m_textureID = textureID;
 }
 
 const int ISEntity::getTextureID() const

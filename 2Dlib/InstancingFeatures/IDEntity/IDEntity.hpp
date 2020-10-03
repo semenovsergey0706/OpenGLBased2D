@@ -7,8 +7,9 @@
 
 class IDEntity : public HEntity, public Transformable
 {
-private:	
-	Color m_eColor;
+private:
+	bool m_updateColor;	
+	glm::vec4 m_eColor;
 
 	bool m_visible = true;
 	bool m_isColorUpdated = false;
@@ -28,10 +29,10 @@ public:
 	void setVisible(bool visible);
 	bool isVisible() const;
 
-	void setColor(Color newColor);
-	void setColor(uint8_t r, uint8_t g, uint8_t b, uint8_t a);
+	void setColor(glm::vec4 newColor);
+	void setColor(float r, float g, float b, float a);
 
-	const Color& getColor();
+	const glm::vec4& getColor();
 
 	void setOrigin(float x, float y);
 	void setOrigin(const glm::vec2& pos);

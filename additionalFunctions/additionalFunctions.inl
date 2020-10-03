@@ -4,6 +4,16 @@
 #include "additionalFunctions.hpp"
 
 template <class T>
+inline void pushWithCheck(bool &checkBox, std::vector<T> &targetVector, T data)
+{
+	if (!checkBox)
+    {
+        checkBox = true;
+        targetVector.push_back(data);
+    }
+}
+
+template <class T>
 int ordered_push(std::vector<T> &targetVector, T data)
 {
 	if (targetVector.empty())

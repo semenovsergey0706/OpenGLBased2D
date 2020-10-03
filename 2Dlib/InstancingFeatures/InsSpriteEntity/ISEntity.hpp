@@ -1,9 +1,13 @@
 #pragma once
 #include "../IDEntity/IDEntity.hpp"
 
+class TDEStorage;
+
 class ISEntity : public IDEntity
 {
 private:
+	bool m_textureUpdate;
+
 	int m_textureID;
 	int m_frameNumber;
 	int m_rowNumber;
@@ -24,7 +28,9 @@ public:
 	const int getRowNumber() const;	
 	const int getFPS() const;
 
-	void setTextureID(int textureID);
+	void setTextureByStorageID(int textureID);
 	const int getTextureID() const;
 	virtual ~ISEntity() = default;
+
+	friend TDEStorage;
 };
