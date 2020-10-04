@@ -7,20 +7,34 @@ constexpr int GLM_MAT3_SIZE_IN_BUFFER = 48;
 
 void TDEStorage::initBuffers()
 {
-    std::vector<glm::vec2> m_eRectSizeData(m_spritesCapacity, glm::vec2(128, 128));
-    this->defaultInitBuffer(m_eRectSizeDataBuffer, m_eRectSizeData);
+    std::vector<glm::vec2> l_eRectSizeData(m_spritesCapacity, glm::vec2(128, 128));
+    this->defaultInitBuffer(m_eRectSizeDataBuffer, l_eRectSizeData);
 
-    std::vector<glm::mat3> m_eTransformData(m_spritesCapacity, glm::mat3(1.0f));
-    this->defaultInitBuffer(m_eTransformDataBuffer, m_eTransformData);
+    std::vector<glm::mat3> l_eTransformData(m_spritesCapacity, glm::mat3(1.0f));
+    this->defaultInitBuffer(m_eTransformDataBuffer, l_eTransformData);
 
-    std::vector<glm::vec4> m_eColorData(m_spritesCapacity, glm::vec4(1.0f));
-    this->defaultInitBuffer(m_eColorBuffer, m_eColorData);
+    std::vector<glm::vec4> l_eColorData(m_spritesCapacity, glm::vec4(1.0f));
+    this->defaultInitBuffer(m_eColorBuffer, l_eColorData);
 
-    std::vector<int> m_renderData(m_spritesCapacity, 1);
-    this->defaultInitBuffer(m_renderSequenceBuffer, m_renderData);
+    std::vector<int> l_renderData(m_spritesCapacity, 1);
+    this->defaultInitBuffer(m_renderSequenceBuffer, l_renderData);
 
-    std::vector<int> m_texturesIDData(m_spritesCapacity, 0);
-    this->defaultInitBuffer(m_spriteTexturesIDBuffer, m_texturesIDData);
+    std::vector<int> l_texturesIDData(m_spritesCapacity, 0);
+    this->defaultInitBuffer(m_spriteTexturesIDBuffer, l_texturesIDData);
+
+    std::vector<glm::vec2> l_eFrameRatio(m_spritesCapacity, glm::vec2(1, 1));
+    this->defaultInitBuffer(m_eFrameRatioBuffer, l_eFrameRatio);
+
+    std::vector<glm::vec2> l_eFrameNum(m_spritesCapacity, glm::vec2(0, 0));
+    this->defaultInitBuffer(m_eFrameNumBuffer, l_eFrameNum);
+}
+
+void TDEStorage::checkFrameUpdate()
+{
+    if (m_currentPlayList.empty()) return;
+
+    for (int i = 0; i < m_currentPlayList.size(); ++i)
+        m_spriteEntities[m_currentPlayList[i]].updateFrame(m_time.elapsed());
 }
 
 void TDEStorage::updateRenderSequencePosition(int old_pos, int new_pos, int len)
@@ -127,9 +141,17 @@ void TDEStorage::updateRectSize()
 {
     m_eRectSizeDataBuffer.bind();
 
+    glm::vec2 size;
     for (int i = 0; i < m_eTextureUpdate.size(); ++i)
     {
-        this->updateSubBufferData(this->getTextureByStorageID(m_spriteEntities[m_eTextureUpdate[i]].m_textureID).getSize(), m_eTextureUpdate[i]);
+        if (m_spriteEntities[m_eTextureUpdate[i]].m_frameNumber == 1)
+            this->updateSubBufferData(this->getTextureByStorageID(m_spriteEntities[m_eTextureUpdate[i]].m_textureID).getSize(), m_eTextureUpdate[i]);
+        else
+        {
+            size.x = this->getTextureByStorageID(m_spriteEntities[m_eTextureUpdate[i]].m_textureID).getSize().x/m_spriteEntities[m_eTextureUpdate[i]].m_columnNumber;
+            size.y = this->getTextureByStorageID(m_spriteEntities[m_eTextureUpdate[i]].m_textureID).getSize().y/m_spriteEntities[m_eTextureUpdate[i]].m_rowNumber;
+            this->updateSubBufferData(size, m_eTextureUpdate[i]);
+        }
     }
 
     m_eRectSizeDataBuffer.unbind();
@@ -145,13 +167,50 @@ void TDEStorage::updateColors()
 
     for (int i = 0; i < m_eColorUpdate.size(); ++i)
     {
-        this->updateSubBufferData(m_spriteEntities[m_eTextureUpdate[i]].m_eColor, m_eColorUpdate[i]);
-        m_spriteEntities[m_eTextureUpdate[i]].m_updateColor = false;
+        this->updateSubBufferData(m_spriteEntities[m_eColorUpdate[i]].m_eColor, m_eColorUpdate[i]);
+        m_spriteEntities[m_eColorUpdate[i]].m_updateColor = false;
     } 
     
     m_eColorBuffer.unbind();
 
     m_eColorUpdate.clear();
+}
+
+void TDEStorage::updateFrameRatio()
+{
+    if (m_eFrameRatioUpdate.empty()) return;
+
+    m_eFrameRatioBuffer.bind();
+
+    glm::vec2 l_ratio;
+    for (int i = 0; i < m_eFrameRatioUpdate.size(); ++i)
+    {
+        l_ratio.x = 1.0/m_spriteEntities[m_eFrameRatioUpdate[i]].m_columnNumber;
+        l_ratio.y = 1.0/m_spriteEntities[m_eFrameRatioUpdate[i]].m_rowNumber;
+        this->updateSubBufferData(l_ratio, m_eFrameRatioUpdate[i]);
+        m_spriteEntities[m_eFrameRatioUpdate[i]].m_frameRatioUpdate = false;
+    }
+    
+    m_eFrameRatioBuffer.unbind();
+
+    m_eFrameRatioUpdate.clear();
+}
+
+void TDEStorage::updateFrame()
+{
+    if (m_eFrameUpdate.empty()) return;
+
+    m_eFrameNumBuffer.bind();
+
+    for (int i = 0; i < m_eFrameUpdate.size(); ++i)
+    {
+        std::cout << m_spriteEntities[m_eFrameUpdate[i]].m_currentFrame.y << " " << m_spriteEntities[m_eFrameUpdate[i]].m_currentFrame.x << std::endl;
+        this->updateSubBufferData(m_spriteEntities[m_eFrameUpdate[i]].m_currentFrame, m_eFrameUpdate[i]);
+    }
+
+    m_eFrameNumBuffer.unbind();
+
+    m_eFrameUpdate.clear();
 }
 
 template <class T>
@@ -176,7 +235,9 @@ void TDEStorage::updateSubBufferData(BufferObj<GL_UNIFORM_BUFFER> &buffer, const
     buffer.unbind();
 }
 
-TDEStorage::TDEStorage(int spritesCapacity, IRWindow &window_) : m_rWindow(&window_), m_spritesCapacity(spritesCapacity)
+TDEStorage::TDEStorage(int spritesCapacity, IRWindow &window_, SimpleTimer &time_) :    m_rWindow(&window_), 
+                                                                                        m_spritesCapacity(spritesCapacity),
+                                                                                        m_time(time_) 
 {
     this->initBuffers();
 }
@@ -190,6 +251,8 @@ void TDEStorage::loadShader(const GLchar* vsPath, const GLchar* fragPath)
     defaultBindBuffer(m_eColorBuffer, "m_color");
     defaultBindBuffer(m_renderSequenceBuffer, "m_renderID");
     defaultBindBuffer(m_spriteTexturesIDBuffer, "m_textureSamplerID");
+    defaultBindBuffer(m_eFrameRatioBuffer, "m_frameRatio");
+    defaultBindBuffer(m_eFrameNumBuffer, "m_frameIndexes");
 }
 
 void TDEStorage::setShader(std::shared_ptr<logl_shader> shader)
@@ -201,6 +264,8 @@ void TDEStorage::setShader(std::shared_ptr<logl_shader> shader)
     defaultBindBuffer(m_eColorBuffer, "m_color");
     defaultBindBuffer(m_renderSequenceBuffer, "m_renderID");
     defaultBindBuffer(m_spriteTexturesIDBuffer, "m_textureSamplerID");
+    defaultBindBuffer(m_eFrameRatioBuffer, "m_frameRatio");
+    defaultBindBuffer(m_eFrameNumBuffer, "m_frameIndexes");
 }
 
 template <class T>
@@ -264,6 +329,9 @@ ISEntity& TDEStorage::getSpriteEntityByStorageID(int id)
 void TDEStorage::drawStorageData()
 {
     this->updateTextures();
+    this->updateFrameRatio();
+    this->checkFrameUpdate();    
+    this->updateFrame();
     this->updateColors();
     this->updateOrders();
     this->updateTransformations();
@@ -453,6 +521,15 @@ void IDEntity::updateAllChildsTransformMatrix()
     }
 }
 
+void IDEntity::setColor(glm::vec4 newColor)
+{
+    if (m_eColor == newColor) return;
+
+    m_eColor = newColor;
+
+    pushWithCheck(m_updateColor, m_parentStorage->m_eColorUpdate, m_storageID);
+}
+
 void ISEntity::setTextureByStorageID(int textureID)
 {
     if (m_textureID == textureID) return;
@@ -462,11 +539,35 @@ void ISEntity::setTextureByStorageID(int textureID)
     pushWithCheck(m_textureUpdate, m_parentStorage->m_eTextureUpdate, m_storageID);
 }
 
-void IDEntity::setColor(glm::vec4 newColor)
+
+void ISEntity::notifyFrameRatioUpdate()
 {
-    if (m_eColor == newColor) return;
+    pushWithCheck(m_frameRatioUpdate, m_parentStorage->m_eFrameRatioUpdate, m_storageID);
+}
 
-    m_eColor = newColor;
+void ISEntity::notifyFrameUpdate()
+{
+    m_parentStorage->m_eFrameUpdate.push_back(m_storageID);
+}
 
-    pushWithCheck(m_updateColor, m_parentStorage->m_eColorUpdate, m_storageID);
+void ISEntity::play()
+{
+    if (m_playListID != -1) return;
+
+    m_parentStorage->m_currentPlayList.push_back(m_storageID);
+    m_playListID = m_parentStorage->m_currentPlayList.size() - 1;
+}
+
+void ISEntity::stop()
+{
+    if (m_playListID == -1) return;
+
+    m_playListID = -1;
+    m_parentStorage->m_currentPlayList.erase(m_parentStorage->m_currentPlayList.begin() + m_playListID);
+
+    if (m_playListID == m_parentStorage->m_currentPlayList.size()) return;
+
+    for (int i = m_playListID; i < m_parentStorage->m_currentPlayList.size(); ++i)
+        --m_parentStorage->m_spriteEntities[m_parentStorage->m_currentPlayList[i]].m_playListID;
+
 }

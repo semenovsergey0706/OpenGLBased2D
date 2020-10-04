@@ -9,6 +9,7 @@ IDEntity::IDEntity(IDEntity &&entity) noexcept	: 	HEntity(std::move(entity)),
 													m_updateColor(entity.m_updateColor), 
 													m_visible(entity.m_visible),
 													m_transformID(entity.m_transformID)
+
 {	
 }
 

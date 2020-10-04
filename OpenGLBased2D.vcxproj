@@ -146,7 +146,6 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="2Dlib\DataStructures\Color\Color.cpp" />
-    <ClCompile Include="2Dlib\DataStructures\PriorityData\PriorityData.cpp" />
     <ClCompile Include="2Dlib\Effector\Effector.cpp" />
     <ClCompile Include="2Dlib\Entities\Drawable\DEntity.cpp" />
     <ClCompile Include="2Dlib\Entities\Drawable\SpriteEntity\SpriteEntity.cpp" />
@@ -164,6 +163,7 @@
     <ClCompile Include="2Dlib\Transform\Transformable.cpp" />
     <ClCompile Include="additionalFunctions\2DMMath\mat3glm.inl" />
     <ClCompile Include="additionalFunctions\additionalFunctions.inl" />
+    <ClCompile Include="additionalFunctions\SimpleTimer\SimpleTimer.cpp" />
     <ClCompile Include="External\logl_shader.cpp" />
     <ClCompile Include="External\stb_image.cpp" />
     <ClCompile Include="InterfaceClasses\NonCopyable.cpp" />
@@ -177,7 +177,6 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="2Dlib\DataStructures\Color\Color.hpp" />
-    <ClInclude Include="2Dlib\DataStructures\PriorityData\PriorityData.hpp" />
     <ClInclude Include="2Dlib\Effector\Effector.hpp" />
     <ClInclude Include="2Dlib\Entities\Drawable\DEntity.hpp" />
     <ClInclude Include="2Dlib\Entities\Drawable\SpriteEntity\SpriteEntity.hpp" />
@@ -195,6 +194,7 @@
     <ClInclude Include="2Dlib\Transform\Transformable.hpp" />
     <ClInclude Include="additionalFunctions\2DMMath\mat3glm.hpp" />
     <ClInclude Include="additionalFunctions\additionalFunctions.hpp" />
+    <ClInclude Include="additionalFunctions\SimpleTimer\SimpleTimer.hpp" />
     <ClInclude Include="External\logl_shader.hpp" />
     <ClInclude Include="External\stb_image.h" />
     <ClInclude Include="InterfaceClasses\NonCopyable.hpp" />

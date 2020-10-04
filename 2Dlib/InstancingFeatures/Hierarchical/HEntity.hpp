@@ -3,7 +3,6 @@
 #include <functional>
 #include <memory>
 #include "../../Entities/Entity.hpp"
-#include "../../DataStructures/PriorityData/PriorityData.hpp"
 
 class TDEStorage;
 

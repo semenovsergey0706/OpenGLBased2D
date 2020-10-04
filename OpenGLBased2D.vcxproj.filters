@@ -66,9 +66,6 @@
     <ClCompile Include="2Dlib\InstancingFeatures\DrawableEntitysStorage\DEStorage.cpp">
       <Filter>Файлы ресурсов</Filter>
     </ClCompile>
-    <ClCompile Include="2Dlib\DataStructures\PriorityData\PriorityData.cpp">
-      <Filter>Файлы ресурсов</Filter>
-    </ClCompile>
     <ClCompile Include="additionalFunctions\additionalFunctions.inl">
       <Filter>Файлы ресурсов</Filter>
     </ClCompile>
@@ -91,6 +88,9 @@
       <Filter>Файлы ресурсов</Filter>
     </ClCompile>
     <ClCompile Include="2Dlib\Transform\Transform.cpp">
+      <Filter>Файлы ресурсов</Filter>
+    </ClCompile>
+    <ClCompile Include="additionalFunctions\SimpleTimer\SimpleTimer.cpp">
       <Filter>Файлы ресурсов</Filter>
     </ClCompile>
   </ItemGroup>
@@ -146,9 +146,6 @@
     <ClInclude Include="2Dlib\InstancingFeatures\Hierarchical\HEntity.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
-    <ClInclude Include="2Dlib\DataStructures\PriorityData\PriorityData.hpp">
-      <Filter>Файлы заголовков</Filter>
-    </ClInclude>
     <ClInclude Include="additionalFunctions\additionalFunctions.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
@@ -171,6 +168,9 @@
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
     <ClInclude Include="2Dlib\Transform\Transform.hpp">
+      <Filter>Файлы заголовков</Filter>
+    </ClInclude>
+    <ClInclude Include="additionalFunctions\SimpleTimer\SimpleTimer.hpp">
       <Filter>Файлы заголовков</Filter>
     </ClInclude>
   </ItemGroup>

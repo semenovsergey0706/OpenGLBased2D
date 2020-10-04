@@ -53,15 +53,17 @@ public:
 
 int main()
 {
+	SimpleTimer timer;
 	IRWindow myWindow(1024, 1024, "MyWindow");
-	TDEStorage myTDE(360, myWindow);
+	TDEStorage myTDE(360, myWindow, timer);
 
 	for (int i = 0; i < 2; ++i)
 	{
 		if (i%2 == 0) myTDE.loadTexture("redRec2.png", 1);
 		else myTDE.loadTexture("blueRec.png", 2);
 	}
-
+	
+	myTDE.loadTexture("testImg.png", 3);
 
 	for (int i = 0; i < 360; ++i)
 	{
@@ -116,6 +118,14 @@ int main()
 	bool retach = false;
 	int conn = 1;
 	bool decreas = true;
+
+	myTDE.getSpriteEntityByStorageID(0).setTextureByStorageID(2);
+	myTDE.getSpriteEntityByStorageID(0).setFrameNumber(6);
+	myTDE.getSpriteEntityByStorageID(0).setColumnNumber(3);
+	myTDE.getSpriteEntityByStorageID(0).setRowNumber(2);
+	myTDE.getSpriteEntityByStorageID(0).setFPS(1);
+	myTDE.getSpriteEntityByStorageID(0).play();
+
     while (!glfwWindowShouldClose(myWindow.get()))
     {
         glfwPollEvents();		
@@ -149,7 +159,7 @@ int main()
 			}
 
 
-			myTDE.getSpriteEntityByStorageID(0).setColor(0.0, 1.0, 1.0, 1.0);
+			//myTDE.getSpriteEntityByStorageID(0).setColor(0.0, 1.0, 1.0, 1.0);
 
 
 			//if (conn == 1 && t.elapsed() >= 2.5)
@@ -158,8 +168,8 @@ int main()
 			//	t.reset();
 			//}				
 			//else conn = 1;
-			if (t.elapsed() >= 2.5)
-			myTDE.getSpriteEntityByStorageID(0).setTextureByStorageID(1);
+			//if (t.elapsed() >= 2.5)
+			/*myTDE.getSpriteEntityByStorageID(0).setTextureByStorageID(1);*/
 
 		/*for (int i = 1; i < 6; ++i)
 		{
