@@ -48,7 +48,7 @@ void ISEntity::updateFrame(float currentTime)
         {
             m_currentFrame.y = 0;
         }
-        else if ((m_currentFrame.y*m_columnNumber + m_currentFrame.x + 1) == m_frameNumber)
+        else if ((m_currentFrame.y*m_columnNumber + m_currentFrame.x) == m_frameNumber)
         {
             m_currentFrame.x = 0;
             m_currentFrame.y = 0;
