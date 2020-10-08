@@ -120,7 +120,7 @@ int main()
 	bool decreas = true;
 
 	myTDE.getSpriteEntityByStorageID(0).setTextureByStorageID(2);
-	myTDE.getSpriteEntityByStorageID(0).setFrameNumber(6);
+	myTDE.getSpriteEntityByStorageID(0).setFrameNumber(5);
 	myTDE.getSpriteEntityByStorageID(0).setColumnNumber(3);
 	myTDE.getSpriteEntityByStorageID(0).setRowNumber(2);
 	myTDE.getSpriteEntityByStorageID(0).setFPS(1);
