@@ -4,8 +4,18 @@
 #include "InheritanceData.hpp"
 
 template <typename T>
-InheritanceData<T>::InheritanceData(int capacity) : IdentificationData<T>(capacity)
+InheritanceData<T>::InheritanceData(int capacity) : IdentificationData<T>(capacity), m_renderSequenceChanged(false)
 {
+	m_ancestorIndex.reserve(capacity);
+	m_futureAncestorIndex.reserve(capacity);
+	m_generation.reserve(capacity);
+	m_inheritanceSequencePosition.reserve(capacity);
+	m_inheritors.reserve(capacity);
+	m_completeInheritorsNumber.reserve(capacity);
+	m_order.reserve(capacity);
+	m_futureOrder.reserve(capacity);
+	m_renderSequenceIndex.reserve(capacity);
+	m_renderSequence.reserve(capacity);
 }
 
 template <typename T>
@@ -21,7 +31,8 @@ InheritanceData<T>::InheritanceData(const InheritanceData<T> &data) noexcept	:	I
 																					m_renderSequenceIndex(data.m_renderSequenceIndex),
 																					m_renderSequence(data.m_renderSequence),
 																					m_waitOrderUpdateComplition(data.m_waitOrderUpdateComplition),
-																					m_waitAttachComplition(data.m_waitAttachComplition)
+																					m_waitAttachComplition(data.m_waitAttachComplition),
+																					m_renderSequenceChanged(data.m_renderSequenceChanged)
 {
 }
 
@@ -38,7 +49,8 @@ InheritanceData<T>::InheritanceData(InheritanceData<T> &&data) noexcept	:	Identi
 																			m_renderSequenceIndex(std::move(data.m_renderSequenceIndex)),
 																			m_renderSequence(std::move(data.m_renderSequence)),
 																			m_waitOrderUpdateComplition(std::move(data.m_waitOrderUpdateComplition)),
-																			m_waitAttachComplition(std::move(data.m_waitAttachComplition))
+																			m_waitAttachComplition(std::move(data.m_waitAttachComplition)),
+																			m_renderSequenceChanged(data.m_renderSequenceChanged)
 }
 
 template <typename T>

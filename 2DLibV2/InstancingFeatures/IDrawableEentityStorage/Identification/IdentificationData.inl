@@ -5,7 +5,7 @@
 template <typename T>
 IdentificationData<T>::IdentificationData(int capacity) : m_capacity(capacity)
 {
-	m_identificator.reserve(m_capacity);
+	m_identificator.reserve(capacity);
 }
 
 template <typename T>
