@@ -11,25 +11,34 @@ InheritanceData<T>::InheritanceData(int capacity) : IdentificationData<T>(capaci
 template <typename T>
 InheritanceData<T>::InheritanceData(const InheritanceData<T> &data) noexcept	:	IdentificationData<T>(data),																					
 																					m_ancestorIndex(data.m_ancestorIndex),
+																					m_futureAncestorIndex(data.m_futureAncestorIndex),
 																					m_generation(data.m_generation),
-																					m_inheritor(data.m_inheritor),
+																					m_inheritanceSequencePosition(data.m_inheritanceSequencePosition),
+																					m_inheritors(data.m_inheritors),
+																					m_completeInheritorsNumber(data.m_completeInheritorsNumber).
 																					m_order(data.m_order),
 																					m_futureOrder(data.m_futureOrder),
 																					m_renderSequenceIndex(data.m_renderSequenceIndex),
-																					m_completeInheritorsNumber(data.m_completeInheritorsNumber)
-			{
+																					m_renderSequence(data.m_renderSequence),
+																					m_waitOrderUpdateComplition(data.m_waitOrderUpdateComplition),
+																					m_waitAttachComplition(data.m_waitAttachComplition)
+{
 }
 
 template <typename T>
-InheritanceData<T>::InheritanceData(InheritanceData<T> &&data) noexcept	:	IdentificationData<T>(std::move(data)),																			
+InheritanceData<T>::InheritanceData(InheritanceData<T> &&data) noexcept	:	IdentificationData<T>(data),																					
 																			m_ancestorIndex(std::move(data.m_ancestorIndex)),
-																			m_generation(std::move(ata.m_generation)),
-																			m_inheritor(std::move(data.m_inheritor)),
+																			m_futureAncestorIndex(std::move(data.m_futureAncestorIndex)),
+																			m_generation(std::move(data.m_generation)),
+																			m_inheritanceSequencePosition(std::move(.m_inheritanceSequencePosition)),
+																			m_inheritors(std::move(data.m_inheritors)),
+																			m_completeInheritorsNumber(std::move(data.m_completeInheritorsNumber)),
 																			m_order(std::move(data.m_order)),
 																			m_futureOrder(std::move(data.m_futureOrder)),
 																			m_renderSequenceIndex(std::move(data.m_renderSequenceIndex)),
-																			m_completeInheritorsNumber(std::move(data.m_completeInheritorsNumber))
-{
+																			m_renderSequence(std::move(data.m_renderSequence)),
+																			m_waitOrderUpdateComplition(std::move(data.m_waitOrderUpdateComplition)),
+																			m_waitAttachComplition(std::move(data.m_waitAttachComplition))
 }
 
 template <typename T>
