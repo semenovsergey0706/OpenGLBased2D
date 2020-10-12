@@ -1,9 +1,8 @@
 #pragma once
-#include "../NonCopyable.hpp"
 #include "../IdentificationData.hpp"
 
-template <typename T, typename P = IdentificationData<T>>
-class Entity : public NonCopyable
+template <typename T, typename P>
+class Entity
 {
 protected:
 	int m_id;
@@ -11,17 +10,21 @@ protected:
 
 	inline void debugAsserts() const;
 
+	void firstAttach(P& dataStorage);
+	void reAttach(P& dataStorage);
+
 public:	
 	Entity();
-	Entity(Entity &&entity) noexcept;
-	Entity<T>& operator=(Entity &&entity) noexcept;
+	Entity(const Entity<T, P> &entity) noexcept;
+	Entity<T, P>& operator=(const Entity<T, P> &entity) noexcept;
 
 	void setIdentificator(T &identificator) const;
 	void setIdentificator(T &&identificator) const;
 
 	const T& getIdentificator() const;
-
+	
 	void attach(P &dataStorage);
+
 	void destroy();
 };
 

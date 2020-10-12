@@ -1,10 +1,7 @@
 #pragma once
 #include "../Identification/IdentificationData.hpp"
 
-template <typename T>
-class InheritanceData;
-
-template <typename T, typename P = InheritanceData>
+template <typename T, typename P>
 class InheritEntity;
 
 template <typename T>
@@ -41,21 +38,19 @@ public:
 
 	InheritanceData(InheritanceData<T> &&data) noexcept;
 
-	~InheritanceData() = default;
-
-	friend InheritEntity<T>;
+	~InheritanceData() = default;	
 
 private:
 
 	bool orderComparator(int id1, int id2);
 
-	void calculateRenderSequencePosition(int id);
+	int calculateRenderSequencePosition(int id);
 
 	void completeRenderSequnceUpdate(int previousPos, int currentPos, int completeInheritorsNumber);
 
 	void updateInheritorsSequnce(int id, int previousPosition);
 
-	void updateIheritorPosition(int id, int previousPosition);
+	int updateIheritorPosition(int id, int previousPosition);
 
 	void updateCurrentOrderData(int id);
 
@@ -74,7 +69,7 @@ private:
 	void decreaseCompleteInheritorsNumber(int id, int delta);
 
 	template <typename Operation>
-	void updateAncestorCompleteInheritorsNumberData(int id, Operation &completeInheritorsNumberUpdater);
+	void updateAncestorCompleteInheritorsNumberData(int id, Operation &&completeInheritorsNumberUpdater);
 
 	void updateCurrentAncestorCompleteInheritorsNumberData(int id);
 
@@ -86,9 +81,17 @@ private:
 
 	void updatePreviousAncestorInheritorsData(int id);
 
+	void analyzeAttachPossibility(int id, int parent_id);
+
 protected:
 
 	void completeAttachProcess();
+
+public:
+
+	void testDraw();
+
+	friend InheritEntity<T, InheritanceData<T>>;
 };
 
 #include "InheritanceData.inl"

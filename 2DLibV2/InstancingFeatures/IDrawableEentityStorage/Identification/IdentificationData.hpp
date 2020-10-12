@@ -1,16 +1,19 @@
 #pragma once
 #include <vector>
 
-template <typename T>
-class IdentificationData;
-
-template <typename T, typename P = IdentificationData<T>>
+template <typename T, typename P>
 class Entity;
 
+template <typename T, typename P>
+class InheritEntity;
+
 template <typename T>
+class InheritanceData;
+
+template <typename T = int>
 class IdentificationData
 {
-private:
+protected:
 	int m_capacity;
 	std::vector<T> m_identificator;
 	
@@ -21,7 +24,8 @@ public:
 
 	~IdentificationData() = default;
 
-	friend Entity<T>;
+	friend Entity<T, IdentificationData<T>>;
+	friend Entity<T, InheritanceData<T>>;
 };
 
 #include "IdentificationData.inl"

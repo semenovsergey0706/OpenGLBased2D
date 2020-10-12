@@ -1,10 +1,11 @@
 #ifndef INHERITANCE_DATA_METHODS_DEFINITION
 #define INHERITANCE_DATA_METHODS_DEFINITION
 
+#include <cassert>
 #include "InheritanceData.hpp"
 
 template <typename T>
-InheritanceData<T>::InheritanceData(int capacity) : IdentificationData<T>(capacity), m_renderSequenceChanged(false)
+InheritanceData<T>::InheritanceData(int capacity) : IdentificationData<int>(capacity), m_renderSequenceChanged(false)
 {
 	m_ancestorIndex.reserve(capacity);
 	m_futureAncestorIndex.reserve(capacity);
@@ -16,32 +17,43 @@ InheritanceData<T>::InheritanceData(int capacity) : IdentificationData<T>(capaci
 	m_futureOrder.reserve(capacity);
 	m_renderSequenceIndex.reserve(capacity);
 	m_renderSequence.reserve(capacity);
+
+	m_ancestorIndex.push_back(-1);
+	m_futureAncestorIndex.push_back(-1);
+	m_generation.push_back(0);
+	m_inheritanceSequencePosition.push_back(0);
+	m_inheritors.emplace_back();
+	m_completeInheritorsNumber.push_back(0);
+	m_order.push_back(0);
+	m_futureOrder.push_back(-1);
+	m_renderSequence.push_back(0);
+	m_renderSequenceIndex.push_back(0);
 }
 
 template <typename T>
-InheritanceData<T>::InheritanceData(const InheritanceData<T> &data) noexcept	:	IdentificationData<T>(data),																					
-																					m_ancestorIndex(data.m_ancestorIndex),
-																					m_futureAncestorIndex(data.m_futureAncestorIndex),
-																					m_generation(data.m_generation),
-																					m_inheritanceSequencePosition(data.m_inheritanceSequencePosition),
-																					m_inheritors(data.m_inheritors),
-																					m_completeInheritorsNumber(data.m_completeInheritorsNumber).
-																					m_order(data.m_order),
-																					m_futureOrder(data.m_futureOrder),
-																					m_renderSequenceIndex(data.m_renderSequenceIndex),
-																					m_renderSequence(data.m_renderSequence),
-																					m_waitOrderUpdateComplition(data.m_waitOrderUpdateComplition),
-																					m_waitAttachComplition(data.m_waitAttachComplition),
-																					m_renderSequenceChanged(data.m_renderSequenceChanged)
+InheritanceData<T>::InheritanceData(const InheritanceData &data) noexcept	:	IdentificationData<int>(data),																					
+																				m_ancestorIndex(data.m_ancestorIndex),
+																				m_futureAncestorIndex(data.m_futureAncestorIndex),
+																				m_generation(data.m_generation),
+																				m_inheritanceSequencePosition(data.m_inheritanceSequencePosition),
+																				m_inheritors(data.m_inheritors),
+																				m_completeInheritorsNumber(data.m_completeInheritorsNumber),
+																				m_order(data.m_order),
+																				m_futureOrder(data.m_futureOrder),
+																				m_renderSequenceIndex(data.m_renderSequenceIndex),
+																				m_renderSequence(data.m_renderSequence),
+																				m_waitOrderUpdateComplition(data.m_waitOrderUpdateComplition),
+																				m_waitAttachComplition(data.m_waitAttachComplition),
+																				m_renderSequenceChanged(data.m_renderSequenceChanged)
 {
 }
 
 template <typename T>
-InheritanceData<T>::InheritanceData(InheritanceData<T> &&data) noexcept	:	IdentificationData<T>(data),																					
+InheritanceData<T>::InheritanceData(InheritanceData &&data) noexcept	:	IdentificationData<int>(data),																					
 																			m_ancestorIndex(std::move(data.m_ancestorIndex)),
 																			m_futureAncestorIndex(std::move(data.m_futureAncestorIndex)),
 																			m_generation(std::move(data.m_generation)),
-																			m_inheritanceSequencePosition(std::move(.m_inheritanceSequencePosition)),
+																			m_inheritanceSequencePosition(std::move(data.m_inheritanceSequencePosition)),
 																			m_inheritors(std::move(data.m_inheritors)),
 																			m_completeInheritorsNumber(std::move(data.m_completeInheritorsNumber)),
 																			m_order(std::move(data.m_order)),
@@ -51,6 +63,7 @@ InheritanceData<T>::InheritanceData(InheritanceData<T> &&data) noexcept	:	Identi
 																			m_waitOrderUpdateComplition(std::move(data.m_waitOrderUpdateComplition)),
 																			m_waitAttachComplition(std::move(data.m_waitAttachComplition)),
 																			m_renderSequenceChanged(data.m_renderSequenceChanged)
+{
 }
 
 template <typename T>
@@ -60,12 +73,12 @@ bool InheritanceData<T>::orderComparator(int id1, int id2)
 }
 
 template <typename T>
-void InheritanceData<T>::calculateRenderSequencePosition(int id)
+int InheritanceData<T>::calculateRenderSequencePosition(int id)
 {
 	if (m_inheritanceSequencePosition[id] == 0)
 		return m_renderSequenceIndex[m_ancestorIndex[id]];
 	else
-		return m_renderSequenceIndex[m_inheritors[m_ancestorIndex[id]][m_inheritanceSequencePosition - 1]];
+		return m_renderSequenceIndex[m_inheritors[m_ancestorIndex[id]][m_inheritanceSequencePosition[id] - 1]];
 }
 
 template <typename T>
@@ -120,11 +133,11 @@ void InheritanceData<T>::updateInheritorsSequnce(int id, int previousPosition)
 }
 
 template <typename T>
-void void InheritanceData<T>::updateIheritorPosition(int id, int previousPosition)
+int InheritanceData<T>::updateIheritorPosition(int id, int previousPosition)
 {
-	auto comparator = 	[this](int i)
+	auto comparator = 	[this, id](int i)
 						{
-							return m_order[id] < m_order[i];
+							return orderComparator(id, i);
 						};
 
 	if (previousPosition > 0 && 
@@ -152,7 +165,7 @@ void void InheritanceData<T>::updateIheritorPosition(int id, int previousPositio
 			indexWithLessOrder = itWithLessOrder.base() - m_inheritors[m_ancestorIndex[id]].begin();
 
 			memmove(&(m_inheritors[m_ancestorIndex[id]][indexWithLessOrder + 2]), 
-					&(targetVector[indexWithLessOrder + 1]), 
+					&(m_inheritors[m_ancestorIndex[id]][indexWithLessOrder + 1]),
 					(previousPosition - indexWithLessOrder - 1) * sizeof(int));
 
 
@@ -195,7 +208,7 @@ void void InheritanceData<T>::updateIheritorPosition(int id, int previousPositio
 					&(m_inheritors[m_ancestorIndex[id]][previousPosition + 1]), 
 					(indexWithLessOrder - previousPosition - 1) * sizeof(int));
 
-			targetVector[indexWithLessOrder - 1] = temp;
+			m_inheritors[m_ancestorIndex[id]][indexWithLessOrder - 1] = id;
 			return indexWithLessOrder - 1;
 		}
 		else
@@ -213,8 +226,8 @@ void void InheritanceData<T>::updateIheritorPosition(int id, int previousPositio
 template <typename T>
 void InheritanceData<T>::updateCurrentOrderData(int id)
 {
-	m_order = m_futureOrder;
-	m_futureOrder = -1;
+	m_order[id] = m_futureOrder[id];
+	m_futureOrder[id] = -1;
 }
 
 template <typename T>
@@ -222,7 +235,9 @@ void InheritanceData<T>::completeOrderUpdate()
 {
 	for (int i = 0; i < m_waitOrderUpdateComplition.size(); ++i)
 	{
-		if (m_futureOrder[m_waitOrderUpdateComplition[i]] < 0) continue;
+		if (m_futureOrder[m_waitOrderUpdateComplition[i]] < 0 || 
+			m_futureOrder[m_waitOrderUpdateComplition[i]] == m_order[m_waitOrderUpdateComplition[i]]) 
+			continue;
 
 		this->updateCurrentOrderData(m_waitOrderUpdateComplition[i]);
 
@@ -249,7 +264,7 @@ void InheritanceData<T>::updateInheritorsGeneration(int id)
 	if (m_inheritors[id].empty()) return;
 
 	for (int i = 0; i < m_inheritors[id].size(); ++i)
-		this->updateGeneration(m_inheritors[i]);
+		this->updateGeneration(m_inheritors[id][i]);
 }
 
 template <typename T>
@@ -271,15 +286,16 @@ void InheritanceData<T>::decreaseCompleteInheritorsNumber(int id, int delta)
 	m_completeInheritorsNumber[id] -= delta;
 }
 
-template <typename T, typename Operation>
-void InheritanceData<T>::updateAncestorCompleteInheritorsNumberData(int id, Operation &completeInheritorsNumberUpdater)
+template <typename T>
+template <typename Operation>
+void InheritanceData<T>::updateAncestorCompleteInheritorsNumberData(int id, Operation&& completeInheritorsNumberUpdater)
 {
 	int completeInheritorsNumberDelta = m_completeInheritorsNumber[id] + 1;
 
 	do
 	{
 		id = m_ancestorIndex[id];
-		completeInheritorsNumberUpdater(id);
+		completeInheritorsNumberUpdater(id, completeInheritorsNumberDelta);
 	}
 	while(m_ancestorIndex[id] >= 0);
 }
@@ -288,16 +304,16 @@ template <typename T>
 void InheritanceData<T>::updateCurrentAncestorCompleteInheritorsNumberData(int id)
 {
 	this->updateAncestorCompleteInheritorsNumberData(id, 
-													[this] (int start_id) 
+													[this] (int start_id, int delta) 
 													{ 
-														increaseCompleteInheritorsNumber(start_id) 
+														increaseCompleteInheritorsNumber(start_id, delta);
 													});	
 }
 
 template <typename T>
 const int InheritanceData<T>::injectInheritor(int id)
 {
-	auto comparator = 	[this](int i)
+	auto comparator = 	[this, id](int i)
 						{
 							return orderComparator(id, i);
 						};
@@ -316,6 +332,9 @@ template <typename T>
 void InheritanceData<T>::updateCurrentAncestorInheritorsData(int id)
 {
 	m_inheritanceSequencePosition[id] = this->injectInheritor(id);
+
+	if (m_inheritanceSequencePosition[id] + 1 >= m_inheritors[m_ancestorIndex[id]].size()) return;
+
 	for (int i = m_inheritanceSequencePosition[id] + 1; m_inheritors[m_ancestorIndex[id]].size(); ++i)
 		++m_inheritanceSequencePosition[m_inheritors[m_ancestorIndex[id]][i]];
 }
@@ -324,10 +343,10 @@ template <typename T>
 void InheritanceData<T>::updatePreviousAncestorCompleteInheritorsNumberData(int id)
 {
 	if (m_ancestorIndex[id] < 0) return;
-	this->updateAncestorCompleteInheritorsNumberData(id, 
-													[this] (int start_id) 
+	this->updateAncestorCompleteInheritorsNumberData(id,
+													[this] (int start_id, int delta) 
 													{ 
-														decreaseCompleteInheritorsNumber(start_id) 
+														decreaseCompleteInheritorsNumber(start_id, delta);
 													});	
 }
 
@@ -355,6 +374,9 @@ void InheritanceData<T>::completeAttachProcess()
 
 		m_ancestorIndex[m_waitAttachComplition[i]] = m_futureAncestorIndex[m_waitAttachComplition[i]];
 
+		if (m_futureOrder[m_waitAttachComplition[i]] != -1)
+			updateCurrentOrderData(m_waitAttachComplition[i]);
+
 		this->updateCurrentAncestorInheritorsData(m_waitAttachComplition[i]);
 		this->updateCurrentAncestorCompleteInheritorsNumberData(m_waitAttachComplition[i]);
 
@@ -366,6 +388,26 @@ void InheritanceData<T>::completeAttachProcess()
 	}
 
 	m_waitAttachComplition.clear();
+}
+
+template <typename T>
+void InheritanceData<T>::analyzeAttachPossibility(int id, int parent_id)
+{
+	while (m_ancestorIndex[m_futureAncestorIndex[parent_id]] != -1)
+	{
+		assert(m_futureAncestorIndex[parent_id] != id && "");
+		parent_id = m_futureAncestorIndex[parent_id];
+	}
+
+	while (m_ancestorIndex[parent_id] != - 1)
+		assert(m_ancestorIndex[parent_id] != id && "");
+}
+
+template <typename T>
+void InheritanceData<T>::testDraw()
+{
+	if (!(m_waitAttachComplition.empty())) this->completeAttachProcess();
+	if (!(m_waitOrderUpdateComplition.empty())) this->completeOrderUpdate();
 }
 
 #endif

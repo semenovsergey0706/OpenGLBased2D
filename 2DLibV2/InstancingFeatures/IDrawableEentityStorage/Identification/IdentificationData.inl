@@ -6,6 +6,7 @@ template <typename T>
 IdentificationData<T>::IdentificationData(int capacity) : m_capacity(capacity)
 {
 	m_identificator.reserve(capacity);
+	m_identificator.push_back(T());
 }
 
 template <typename T>
