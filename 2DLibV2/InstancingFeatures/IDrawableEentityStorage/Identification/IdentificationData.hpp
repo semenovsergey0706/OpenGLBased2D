@@ -19,7 +19,7 @@ protected:
 	
 public:
 	IdentificationData(int capacity);
-	IdentificationData(const IdentificationData<T> &data) noexcept;		
+	IdentificationData(const IdentificationData<T> &data);		
 	IdentificationData(IdentificationData<T> &&data) noexcept;
 
 	~IdentificationData() = default;

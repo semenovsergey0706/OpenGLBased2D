@@ -7,10 +7,8 @@ class InheritEntity;
 template <typename T>
 class InheritanceData : public IdentificationData<T>
 {
-private:
-	std::vector<int> m_ancestorIndex;
-	std::vector<int> m_futureAncestorIndex;
-	std::vector<int> m_generation;
+private:	
+	std::vector<int> m_futureAncestorIndex;	
 	std::vector<int> m_inheritanceSequencePosition;
 
 	std::vector<std::vector<int>> m_inheritors;
@@ -28,13 +26,15 @@ private:
 
 protected:
 
+	std::vector<int> m_ancestorIndex;
+	std::vector<int> m_generation;
 	bool m_renderSequenceChanged;
 
 public:
 
 	InheritanceData(int capacity);
 
-	InheritanceData(const InheritanceData<T> & data) noexcept;
+	InheritanceData(const InheritanceData<T> & data);
 
 	InheritanceData(InheritanceData<T> &&data) noexcept;
 

@@ -43,15 +43,15 @@ void InheritEntity<T, P>::reAttach(P& dataStorage)
 template <typename T, typename P>
 void InheritEntity<T, P>::attach(P& dataStorage)
 {
-	if (Entity<T, P>::m_dataStorage == &dataStorage) return;
+	if (this->m_dataStorage == &dataStorage) return;
 
-	if (Entity<T, P>::m_dataStorage)
+	if (this->m_dataStorage)
 		reAttach(dataStorage);
 	else
 		firstAttach(dataStorage);
 
-	Entity<T, P>::m_dataStorage = &dataStorage;
-	Entity<T, P>::m_id = dataStorage.m_identificator.size() - 1;
+	this->m_dataStorage = &dataStorage;
+	this->m_id = dataStorage.m_identificator.size() - 1;
 }
 
 template <typename T, typename P>
@@ -59,64 +59,64 @@ void InheritEntity<T, P>::attachTo(InheritEntity<T, P> &parent)
 {
 	#ifdef _DEBUG
 		this->debugAsserts();
-		assert((Entity<T, P>::m_id != (parent.Entity<T, P>::m_id)) && "entity can't attach itself");
-		Entity<T, P>::m_dataStorage->analyzeAttachPossibility(Entity<T, P>::m_id, parent.Entity<T, P>::m_id);
+		assert((this->m_id != (parent.this->m_id)) && "entity can't attach itself");
+		this->m_dataStorage->analyzeAttachPossibility(this->m_id, parent.this->m_id);
 	#endif
 
-	if (parent.m_dataStorage == Entity<T, P>::m_dataStorage)
+	if (parent.m_dataStorage == this->m_dataStorage)
 		return;
 
-	if (Entity<T, P>::m_dataStorage->m_futureAncestorIndex[Entity<T, P>::m_id] < 0)
-		Entity<T, P>::m_dataStorage->m_waitAttachComplition.push_back(Entity<T, P>::m_id);
+	if (this->m_dataStorage->m_futureAncestorIndex[this->m_id] < 0)
+		this->m_dataStorage->m_waitAttachComplition.push_back(this->m_id);
 
-	Entity<T, P>::m_dataStorage->m_futureAncestorIndex[Entity<T, P>::m_id] = parent.m_id;
+	this->m_dataStorage->m_futureAncestorIndex[this->m_id] = parent.m_id;
 
 }
 
 template <typename T, typename P>
 const T& InheritEntity<T, P>::getAncestorIdentificator()
 {
-	return Entity<T, P>::m_dataStorage->m_identificator[Entity<T, P>::m_dataStorage->m_ancestorIndex[Entity<T, P>::m_id]];
+	return this->m_dataStorage->m_identificator[this->m_dataStorage->m_ancestorIndex[this->m_id]];
 }
 
 template <typename T, typename P>
 const int InheritEntity<T, P>::getAncestorID()
 {
-	return Entity<T, P>::m_dataStorage->m_parentIndex[Entity<T, P>::m_id];
+	return this->m_dataStorage->m_parentIndex[this->m_id];
 }
 
 template <typename T, typename P>
 const std::vector<int>& InheritEntity<T, P>::getInheritorsIDs()
 {
-	return Entity<T, P>::m_dataStorage->m_inheritors[Entity<T, P>::m_id];
+	return this->m_dataStorage->m_inheritors[this->m_id];
 }
 
 template <typename T, typename P>
 void InheritEntity<T, P>::setOrder(int order)
 {
-	if (order == Entity<T, P>::m_dataStorage->m_order[Entity<T, P>::m_id])
-		if (Entity<T, P>::m_dataStorage->m_futureOrder[Entity<T, P>::m_id] < 0)
+	if (order == this->m_dataStorage->m_order[this->m_id])
+		if (this->m_dataStorage->m_futureOrder[this->m_id] < 0)
 			return;
 		else
 		{
-			Entity<T, P>::m_dataStorage->m_futureOrder[Entity<T, P>::m_id] = order;
+			this->m_dataStorage->m_futureOrder[this->m_id] = order;
 			return;
 		}
 	else
-		if (Entity<T, P>::m_dataStorage->m_futureOrder[Entity<T, P>::m_id] < 0)
+		if (this->m_dataStorage->m_futureOrder[this->m_id] < 0)
 		{
-			Entity<T, P>::m_dataStorage->m_waitOrderUpdateComplition.push_back(Entity<T, P>::m_id);
-			Entity<T, P>::m_dataStorage->m_futureOrder[Entity<T, P>::m_id] = order;
+			this->m_dataStorage->m_waitOrderUpdateComplition.push_back(this->m_id);
+			this->m_dataStorage->m_futureOrder[this->m_id] = order;
 		}			
 }
 
 template <typename T, typename P>
 int InheritEntity<T, P>::getOrder() const
 {
-	if (Entity<T, P>::m_dataStorage->m_futureOrder[Entity<T, P>::m_id] > 0)
-		return Entity<T, P>::m_dataStorage->m_futureOrder[Entity<T, P>::m_id];
+	if (this->m_dataStorage->m_futureOrder[this->m_id] > 0)
+		return this->m_dataStorage->m_futureOrder[this->m_id];
 	else
-		return Entity<T, P>::m_dataStorage->m_order[Entity<T, P>::m_id];
+		return this->m_dataStorage->m_order[this->m_id];
 }
 
 #endif
